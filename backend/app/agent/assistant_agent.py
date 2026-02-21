@@ -1,7 +1,7 @@
-"""Study status assistant agent using Google ADK with AWS Bedrock.
+"""Market analysis assistant agent using Google ADK with AWS Bedrock.
 
-This module provides a generic AI assistant that can be customized for the
-study status application. It demonstrates the pattern for:
+This module provides an AI assistant for the Mobile Market Analysis Dashboard.
+It demonstrates the pattern for:
 - Dynamic instruction injection from AG-UI context
 - Integration with AWS Bedrock via LiteLLM
 - Reading frontend state via useCopilotReadable
@@ -19,9 +19,9 @@ CONTEXT_STATE_KEY = "_ag_ui_context"
 # Requires AWS credentials (env vars, ~/.aws/credentials, or IAM role)
 BEDROCK_MODEL = "us.anthropic.claude-sonnet-4-20250514-v1:0"
 
-BASE_INSTRUCTION = """You are a helpful assistant for the Study Status application.
+BASE_INSTRUCTION = """You are a helpful assistant for the Mobile Market Analysis Dashboard.
 
-Your role is to help users understand and interact with the application data and features.
+Your role is to help users understand and interact with market analysis data and features.
 
 ## How to Help Users
 
@@ -81,17 +81,17 @@ specific, data-driven answers:
 
 
 def create_assistant_agent() -> LlmAgent:
-    """Create the study status assistant agent.
+    """Create the market analysis assistant agent.
 
     The agent uses a dynamic instruction provider to inject context from
     the frontend (via useCopilotReadable hooks) into the system prompt.
     This allows the agent to see the current application state.
 
     Returns:
-        LlmAgent: The configured ADK agent for the study status application.
+        LlmAgent: The configured ADK agent for the market analysis dashboard.
     """
     return LlmAgent(
-        name="study_status_assistant",
+        name="market_analysis_assistant",
         model=LiteLlm(model=BEDROCK_MODEL),
         instruction=instruction_provider,
     )

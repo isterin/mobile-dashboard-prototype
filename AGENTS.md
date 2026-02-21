@@ -7,15 +7,14 @@
 # Backend
 cd backend && fastapi dev app/main.py        # Run dev server (port 8000)
 cd backend && uv run pytest                   # Run all tests
-cd backend && uv run pytest tests/api/routes/test_items.py  # Single test file
-cd backend && uv run pytest -k "test_create_item"           # Single test by name
+cd backend && uv run pytest tests/api/routes/test_utils.py   # Single test file
+cd backend && uv run pytest -k "test_health_check"           # Single test by name
 cd backend && uv run ruff check --fix && uv run ruff format # Lint & format
 
 # Frontend
 cd frontend && bun run dev                    # Run dev server (port 5173)
 cd frontend && bun run build                  # TypeScript check + build
 cd frontend && bun run test                   # Run Playwright tests
-cd frontend && bun run test tests/login.spec.ts             # Single test file
 cd frontend && bun run lint                   # Lint & format with Biome
 
 # Database
@@ -28,13 +27,14 @@ bash scripts/generate-client.sh
 
 ### Docker Commands
 ```bash
-docker compose watch                          # Start all services with hot reload
-docker compose exec postgres psql -U studystatus -d studystatus  # DB shell
+docker compose -f compose.local.yml up -d     # Start local infra (postgres + adminer)
+docker compose -f compose.local.yml down       # Stop local infra
+docker compose -f compose.local.yml exec postgres psql -U marketanalysis -d marketanalysis  # DB shell
 ```
 
 ## Domain Context
 
-This is a study status application scaffold with CopilotKit AI assistant integration.
+This is a mobile market analysis dashboard with CopilotKit AI assistant integration.
 The domain-specific features are to be implemented.
 
 ## Code Style Guidelines
@@ -50,12 +50,11 @@ from fastapi import APIRouter, HTTPException
 from sqlmodel import select
 
 from app.api.deps import SessionDep
-from app.models import Item
 ```
 
 **Type Hints** - Required everywhere, use modern syntax:
 ```python
-def get_item(session: SessionDep, item_id: uuid.UUID) -> Item | None:
+def get_resource(session: SessionDep, resource_id: uuid.UUID) -> Resource | None:
     ...
 ```
 
@@ -66,26 +65,26 @@ def get_item(session: SessionDep, item_id: uuid.UUID) -> Item | None:
 
 **Models** - Use SQLModel with separate schemas:
 ```python
-class ItemBase(SQLModel):           # Shared fields
+class ResourceBase(SQLModel):           # Shared fields
     title: str
-class ItemCreate(ItemBase): pass    # Create request
-class ItemPublic(ItemBase):         # API response
+class ResourceCreate(ResourceBase): pass    # Create request
+class ResourcePublic(ResourceBase):         # API response
     id: uuid.UUID
-class Item(ItemBase, table=True):   # Database table
+class Resource(ResourceBase, table=True):   # Database table
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
 ```
 
 **Error Handling**:
 ```python
 from fastapi import HTTPException, status
-raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
+raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Resource not found")
 ```
 
 **Docstrings** - Required for API endpoints:
 ```python
 @router.get("/")
-def list_items(session: SessionDep) -> Any:
-    """List all items. Returns paginated results."""
+def list_resources(session: SessionDep) -> Any:
+    """List all resources. Returns paginated results."""
     ...
 ```
 
@@ -96,7 +95,6 @@ def list_items(session: SessionDep) -> Any:
 import { useQuery } from "@tanstack/react-query"
 
 import { cn } from "@/lib/utils"
-import type { ItemPublic } from "./types"
 ```
 
 **Formatting** (Biome config):
@@ -108,12 +106,12 @@ import type { ItemPublic } from "./types"
 **Component Structure**:
 ```typescript
 interface ComponentProps {
-  source: RankingSource
+  data: SomeData
   isSelected: boolean
   onToggle: (id: string) => void
 }
 
-export function Component({ source, isSelected, onToggle }: ComponentProps) {
+export function Component({ data, isSelected, onToggle }: ComponentProps) {
   return (...)
 }
 ```
@@ -126,7 +124,7 @@ export function Component({ source, isSelected, onToggle }: ComponentProps) {
 
 **Hooks** - Prefix with `use`:
 ```typescript
-export function useAuth() { ... }
+export function useMarketData() { ... }
 ```
 
 ## Project Structure
@@ -134,9 +132,9 @@ export function useAuth() { ... }
 ```
 backend/app/
 ├── api/routes/          # API endpoints (one file per resource)
-├── core/                # Config, DB, security
+├── core/                # Config, DB
 ├── models.py            # All SQLModel schemas
-├── services/            # Business logic (e.g., ranking.py)
+├── services/            # Business logic
 └── agent/               # AI agent code (CopilotKit/AG-UI)
 
 frontend/src/
@@ -154,20 +152,14 @@ frontend/src/
 2. **Never edit `frontend/src/components/ui/`** - shadcn/ui managed
 3. **Always run `bash scripts/generate-client.sh`** after backend model changes
 4. **Always create migrations** for database schema changes
-5. **Use dependency injection** via `SessionDep`, `CurrentUser` in routes
+5. **Use dependency injection** via `SessionDep` in routes
 
 ## Testing Patterns
 
 ### Backend (pytest)
 ```python
-def test_create_item(
-    client: TestClient, superuser_token_headers: dict[str, str]
-) -> None:
-    response = client.post(
-        f"{settings.API_V1_STR}/items/",
-        headers=superuser_token_headers,
-        json={"title": "Test"},
-    )
+def test_health_check(client: TestClient) -> None:
+    response = client.get(f"{settings.API_V1_STR}/utils/health-check/")
     assert response.status_code == 200
 ```
 
@@ -175,16 +167,16 @@ def test_create_item(
 ```typescript
 import { expect, test } from "@playwright/test"
 
-test("shows login form", async ({ page }) => {
-  await page.goto("/login")
-  await expect(page.getByTestId("email-input")).toBeVisible()
+test("shows dashboard", async ({ page }) => {
+  await page.goto("/")
+  await expect(page.getByText("Market Analysis Dashboard")).toBeVisible()
 })
 ```
 
 ## API Conventions
 
 - All routes prefixed with `/api/v1`
-- Use trailing slashes: `/api/v1/sources/`
+- Use trailing slashes: `/api/v1/resources/`
 - Response models: `{Resource}Public` for single, `{Resource}sPublic` for lists
 - List responses include `data` array and `count`
 
@@ -192,5 +184,4 @@ test("shows login form", async ({ page }) => {
 
 Key `.env` variables:
 - `POSTGRES_*` - Database connection
-- `SECRET_KEY` - JWT signing (change in production!)
 - `VITE_COPILOT_RUNTIME_URL` - CopilotKit runtime endpoint

@@ -1,4 +1,4 @@
-"""AG-UI endpoint for the study status assistant agent.
+"""AG-UI endpoint for the market analysis assistant agent.
 
 This module exposes the ADK agent via the AG-UI protocol for CopilotKit integration.
 """
@@ -14,7 +14,7 @@ router = APIRouter(tags=["agent"])
 _adk_agent = create_assistant_agent()
 _agent_wrapper = ADKAgent(
     adk_agent=_adk_agent,
-    app_name="study_status",
+    app_name="market_analysis",
     user_id="default",
     use_in_memory_services=True,
 )

@@ -163,8 +163,10 @@
 }
 
 /* Ensure textarea doesn't have unexpected initial height */
+/* font-size: 16px prevents mobile browsers from auto-zooming on focus */
 .copilot-chat-embedded .copilotKitInput > textarea {
   min-height: unset;
+  font-size: 16px;
 }
 
 /* Fix: Force small height when textarea is empty (placeholder visible) */

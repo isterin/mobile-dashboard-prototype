@@ -6,7 +6,7 @@ export const Route = createFileRoute("/_layout")({
 
 function Layout() {
   return (
-    <main className="min-h-screen p-6 md:p-8">
+    <main className="min-h-screen">
       <Outlet />
     </main>
   )

@@ -34,7 +34,7 @@ const AGENT_URL = process.env.AGENT_URL || "http://localhost:8000/agent"
 const serviceAdapter = new ExperimentalEmptyAdapter()
 const runtime = new CopilotRuntime({
   agents: {
-    study_status_assistant: new HttpAgent({
+    market_analysis_assistant: new HttpAgent({
       url: AGENT_URL,
     }),
   },

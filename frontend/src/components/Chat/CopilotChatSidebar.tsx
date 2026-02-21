@@ -1,22 +1,14 @@
 import { useCopilotAction, useCopilotReadable } from "@copilotkit/react-core"
 import { CopilotChat } from "@copilotkit/react-ui"
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  MessageSquareIcon,
-  MessageSquareOffIcon,
-} from "lucide-react"
+import { MessageSquareOffIcon, XIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
 
 interface CopilotChatSidebarProps {
   /** Data to share with the AI assistant via useCopilotReadable */
   contextData?: Record<string, unknown>
-  /** Whether the sidebar is collapsed */
-  isCollapsed: boolean
-  /** Callback when collapse state changes */
-  onToggleCollapse: () => void
+  /** Callback to close the sidebar */
+  onClose: () => void
   /** Whether the agent is unavailable (runtime not running) */
   isUnavailable?: boolean
 }
@@ -33,8 +25,7 @@ interface CopilotChatSidebarProps {
  */
 export function CopilotChatSidebar({
   contextData,
-  isCollapsed,
-  onToggleCollapse,
+  onClose,
   isUnavailable = false,
 }: CopilotChatSidebarProps) {
   // ==========================================================================
@@ -79,99 +70,66 @@ export function CopilotChatSidebar({
       "Provide help information about the application. Use this when the user asks for help or how to use the application.",
     parameters: [],
     handler: async () => {
-      return "This is the Study Status application. You can ask me questions about the data displayed, and I'll help you understand it."
+      return "This is the Market Analysis Dashboard. You can ask me questions about the data displayed, and I'll help you understand it."
     },
   })
 
   // Unavailable state (agent not running)
   if (isUnavailable) {
     return (
-      <div
-        className={cn(
-          "relative flex flex-col border-l bg-card transition-all duration-300",
-          isCollapsed ? "w-12" : "w-96",
-        )}
-      >
-        {/* Toggle Button */}
+      <div className="relative flex h-full w-full flex-col border-l bg-card md:w-96">
+        {/* Close Button */}
         <Button
           variant="ghost"
           size="icon"
-          className="absolute -left-3 top-4 z-40 h-6 w-6 rounded-full border bg-background shadow-sm"
-          onClick={onToggleCollapse}
+          className="absolute right-2 top-2 z-40 h-7 w-7"
+          onClick={onClose}
         >
-          {isCollapsed ? (
-            <ChevronLeftIcon className="h-4 w-4" />
-          ) : (
-            <ChevronRightIcon className="h-4 w-4" />
-          )}
+          <XIcon className="h-4 w-4" />
         </Button>
 
-        {isCollapsed ? (
-          <div className="flex h-full flex-col items-center py-4">
-            <MessageSquareOffIcon className="h-5 w-5 text-muted-foreground" />
-          </div>
-        ) : (
-          <>
-            <div className="border-b p-4">
-              <h2 className="flex items-center gap-2 font-semibold text-muted-foreground">
-                <MessageSquareOffIcon className="h-5 w-5" />
-                Chat Unavailable
-              </h2>
-            </div>
-            <div className="flex flex-1 flex-col items-center justify-center p-4 text-center">
-              <p className="text-sm text-muted-foreground">
-                The AI assistant is not available.
-              </p>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Start the CopilotKit runtime server with{" "}
-                <code className="rounded bg-muted px-1">bun run copilot</code>{" "}
-                to enable chat.
-              </p>
-            </div>
-          </>
-        )}
+        <div className="border-b p-4">
+          <h2 className="flex items-center gap-2 font-semibold text-muted-foreground">
+            <MessageSquareOffIcon className="h-5 w-5" />
+            Chat Unavailable
+          </h2>
+        </div>
+        <div className="flex flex-1 flex-col items-center justify-center p-4 text-center">
+          <p className="text-sm text-muted-foreground">
+            The AI assistant is not available.
+          </p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Start the CopilotKit runtime server with{" "}
+            <code className="rounded bg-muted px-1">bun run copilot</code> to
+            enable chat.
+          </p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div
-      className={cn(
-        "relative flex flex-col border-l bg-card transition-all duration-300",
-        isCollapsed ? "w-12" : "w-96",
-      )}
-    >
-      {/* Toggle Button */}
+    <div className="relative flex h-full w-full flex-col border-l bg-card md:w-96">
+      {/* Close Button */}
       <Button
         variant="ghost"
         size="icon"
-        className="absolute -left-3 top-4 z-40 h-6 w-6 rounded-full border bg-background shadow-sm"
-        onClick={onToggleCollapse}
+        className="absolute right-2 top-2 z-40 h-7 w-7"
+        onClick={onClose}
       >
-        {isCollapsed ? (
-          <ChevronLeftIcon className="h-4 w-4" />
-        ) : (
-          <ChevronRightIcon className="h-4 w-4" />
-        )}
+        <XIcon className="h-4 w-4" />
       </Button>
 
-      {isCollapsed ? (
-        /* Collapsed State */
-        <div className="flex h-full flex-col items-center py-4">
-          <MessageSquareIcon className="h-5 w-5 text-muted-foreground" />
-        </div>
-      ) : (
-        /* Expanded State - CopilotChat fills the container */
-        <div className="copilot-chat-embedded">
-          <CopilotChat
-            labels={{
-              title: "Dot",
-              initial:
-                "Hi! I'm Dot, your AI assistant. How can I help you today?",
-            }}
-          />
-        </div>
-      )}
+      {/* CopilotChat fills the container */}
+      <div className="copilot-chat-embedded">
+        <CopilotChat
+          labels={{
+            title: "Dot",
+            initial:
+              "Hi! I'm Dot, your AI assistant. How can I help you today?",
+          }}
+        />
+      </div>
     </div>
   )
 }

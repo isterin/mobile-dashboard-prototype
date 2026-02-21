@@ -1,5 +1,5 @@
 {
-  "name": "fastapi-full-stack-template",
+  "name": "mobile-market-analysis-dashboard",
   "private": true,
   "scripts": {
     "dev": "cd frontend && bun run dev",
