@@ -1,0 +1,131 @@
+version: "3"
+
+vars:
+  BACKEND_DIR: ./backend
+  FRONTEND_DIR: ./frontend
+
+tasks:
+  # =============================================================================
+  # Development
+  # =============================================================================
+  dev:
+    desc: Start infrastructure and all dev servers (frontend, backend, copilot runtime)
+    deps:
+      - dev-infra
+    cmds:
+      - concurrently --kill-others-on-fail --names "fe,be,copilot" --prefix-colors "cyan,magenta,yellow" "cd {{.FRONTEND_DIR}} && bun run dev" "cd {{.BACKEND_DIR}} && uv run fastapi dev app/main.py" "cd {{.FRONTEND_DIR}} && bun run copilot"
+
+  dev-frontend:
+    desc: Start frontend dev server (http://localhost:5173)
+    dir: "{{.FRONTEND_DIR}}"
+    cmds:
+      - bun run dev
+
+  dev-backend:
+    desc: Start backend dev server (http://localhost:8000)
+    dir: "{{.BACKEND_DIR}}"
+    cmds:
+      - uv run fastapi dev app/main.py
+
+  dev-copilot:
+    desc: Start CopilotKit runtime server (http://localhost:4000)
+    dir: "{{.FRONTEND_DIR}}"
+    cmds:
+      - bun run copilot
+
+  # =============================================================================
+  # Infrastructure
+  # =============================================================================
+  dev-infra:
+    desc: Start local infrastructure (postgres, adminer)
+    cmds:
+      - docker compose -f compose.local.yml up -d
+
+  dev-infra-stop:
+    desc: Stop local infrastructure
+    cmds:
+      - docker compose -f compose.local.yml down
+
+  dev-infra-logs:
+    desc: Tail logs from local infrastructure
+    cmds:
+      - docker compose -f compose.local.yml logs -f
+
+  dev-infra-clean:
+    desc: Stop infrastructure and remove volumes (fresh database)
+    cmds:
+      - docker compose -f compose.local.yml down -v
+
+  # =============================================================================
+  # Dependencies
+  # =============================================================================
+  install:
+    desc: Install all dependencies
+    cmds:
+      - concurrently --kill-others-on-fail --names "fe,be" --prefix-colors "cyan,magenta" "cd {{.FRONTEND_DIR}} && bun install" "cd {{.BACKEND_DIR}} && uv sync"
+
+  install-frontend:
+    desc: Install frontend dependencies
+    dir: "{{.FRONTEND_DIR}}"
+    cmds:
+      - bun install
+
+  install-backend:
+    desc: Install backend dependencies
+    dir: "{{.BACKEND_DIR}}"
+    cmds:
+      - uv sync
+
+  # =============================================================================
+  # Database
+  # =============================================================================
+  db-migrate:
+    desc: Run all pending database migrations
+    dir: "{{.BACKEND_DIR}}"
+    cmds:
+      - uv run alembic upgrade head
+
+  db-rollback:
+    desc: Rollback the last database migration
+    dir: "{{.BACKEND_DIR}}"
+    cmds:
+      - uv run alembic downgrade -1
+
+  db-revision:
+    desc: 'Create a new database migration (usage: task db-revision NAME="description")'
+    dir: "{{.BACKEND_DIR}}"
+    preconditions:
+      - sh: 'test -n "{{.NAME}}"'
+        msg: 'NAME is required. Usage: task db-revision NAME="add users table"'
+    cmds:
+      - uv run alembic revision --autogenerate -m "{{.NAME}}"
+
+  # =============================================================================
+  # Linting & Formatting
+  # =============================================================================
+  lint:
+    desc: Lint and format all code
+    cmds:
+      - task: lint-frontend
+      - task: lint-backend
+
+  lint-frontend:
+    desc: Lint and format frontend code
+    dir: "{{.FRONTEND_DIR}}"
+    cmds:
+      - bun run lint
+
+  lint-backend:
+    desc: Lint and format backend code
+    dir: "{{.BACKEND_DIR}}"
+    cmds:
+      - uv run ruff check --fix
+      - uv run ruff format
+
+  # =============================================================================
+  # Code Generation
+  # =============================================================================
+  generate-client:
+    desc: Regenerate frontend API client from OpenAPI spec
+    cmds:
+      - ./scripts/generate-client.sh

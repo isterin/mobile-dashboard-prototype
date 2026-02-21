@@ -1,0 +1,196 @@
+# AGENTS.md - AI Coding Agent Guidelines
+
+## Quick Reference
+
+### Build & Run Commands
+```bash
+# Backend
+cd backend && fastapi dev app/main.py        # Run dev server (port 8000)
+cd backend && uv run pytest                   # Run all tests
+cd backend && uv run pytest tests/api/routes/test_items.py  # Single test file
+cd backend && uv run pytest -k "test_create_item"           # Single test by name
+cd backend && uv run ruff check --fix && uv run ruff format # Lint & format
+
+# Frontend
+cd frontend && bun run dev                    # Run dev server (port 5173)
+cd frontend && bun run build                  # TypeScript check + build
+cd frontend && bun run test                   # Run Playwright tests
+cd frontend && bun run test tests/login.spec.ts             # Single test file
+cd frontend && bun run lint                   # Lint & format with Biome
+
+# Database
+cd backend && alembic upgrade head            # Run migrations
+cd backend && alembic revision --autogenerate -m "desc"     # Create migration
+
+# API Client (regenerate after backend model changes)
+bash scripts/generate-client.sh
+```
+
+### Docker Commands
+```bash
+docker compose watch                          # Start all services with hot reload
+docker compose exec postgres psql -U studystatus -d studystatus  # DB shell
+```
+
+## Domain Context
+
+This is a study status application scaffold with CopilotKit AI assistant integration.
+The domain-specific features are to be implemented.
+
+## Code Style Guidelines
+
+### Python (Backend)
+
+**Imports** - Organized by Ruff/isort (stdlib → third-party → local):
+```python
+import uuid
+from typing import Any
+
+from fastapi import APIRouter, HTTPException
+from sqlmodel import select
+
+from app.api.deps import SessionDep
+from app.models import Item
+```
+
+**Type Hints** - Required everywhere, use modern syntax:
+```python
+def get_item(session: SessionDep, item_id: uuid.UUID) -> Item | None:
+    ...
+```
+
+**Naming**:
+- Functions/variables: `snake_case`
+- Classes: `PascalCase`
+- Constants: `UPPER_SNAKE_CASE`
+
+**Models** - Use SQLModel with separate schemas:
+```python
+class ItemBase(SQLModel):           # Shared fields
+    title: str
+class ItemCreate(ItemBase): pass    # Create request
+class ItemPublic(ItemBase):         # API response
+    id: uuid.UUID
+class Item(ItemBase, table=True):   # Database table
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+```
+
+**Error Handling**:
+```python
+from fastapi import HTTPException, status
+raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
+```
+
+**Docstrings** - Required for API endpoints:
+```python
+@router.get("/")
+def list_items(session: SessionDep) -> Any:
+    """List all items. Returns paginated results."""
+    ...
+```
+
+### TypeScript (Frontend)
+
+**Imports** - Organized by Biome (external → aliased → relative):
+```typescript
+import { useQuery } from "@tanstack/react-query"
+
+import { cn } from "@/lib/utils"
+import type { ItemPublic } from "./types"
+```
+
+**Formatting** (Biome config):
+- Double quotes for strings
+- No semicolons (except when required)
+- 2-space indentation
+- Self-closing elements: `<Component />`
+
+**Component Structure**:
+```typescript
+interface ComponentProps {
+  source: RankingSource
+  isSelected: boolean
+  onToggle: (id: string) => void
+}
+
+export function Component({ source, isSelected, onToggle }: ComponentProps) {
+  return (...)
+}
+```
+
+**Naming**:
+- Components: `PascalCase`
+- Functions/variables: `camelCase`
+- Types/interfaces: `PascalCase`
+- Files: `PascalCase.tsx` for components, `camelCase.ts` for utilities
+
+**Hooks** - Prefix with `use`:
+```typescript
+export function useAuth() { ... }
+```
+
+## Project Structure
+
+```
+backend/app/
+├── api/routes/          # API endpoints (one file per resource)
+├── core/                # Config, DB, security
+├── models.py            # All SQLModel schemas
+├── services/            # Business logic (e.g., ranking.py)
+└── agent/               # AI agent code (CopilotKit/AG-UI)
+
+frontend/src/
+├── client/              # Auto-generated API client (DO NOT EDIT)
+├── components/ui/       # shadcn/ui primitives (DO NOT EDIT)
+├── components/{Feature}/ # Feature components
+├── routes/              # TanStack Router pages
+├── hooks/               # Custom React hooks
+└── types/               # TypeScript type definitions
+```
+
+## Critical Rules
+
+1. **Never edit `frontend/src/client/`** - Auto-generated from OpenAPI spec
+2. **Never edit `frontend/src/components/ui/`** - shadcn/ui managed
+3. **Always run `bash scripts/generate-client.sh`** after backend model changes
+4. **Always create migrations** for database schema changes
+5. **Use dependency injection** via `SessionDep`, `CurrentUser` in routes
+
+## Testing Patterns
+
+### Backend (pytest)
+```python
+def test_create_item(
+    client: TestClient, superuser_token_headers: dict[str, str]
+) -> None:
+    response = client.post(
+        f"{settings.API_V1_STR}/items/",
+        headers=superuser_token_headers,
+        json={"title": "Test"},
+    )
+    assert response.status_code == 200
+```
+
+### Frontend (Playwright)
+```typescript
+import { expect, test } from "@playwright/test"
+
+test("shows login form", async ({ page }) => {
+  await page.goto("/login")
+  await expect(page.getByTestId("email-input")).toBeVisible()
+})
+```
+
+## API Conventions
+
+- All routes prefixed with `/api/v1`
+- Use trailing slashes: `/api/v1/sources/`
+- Response models: `{Resource}Public` for single, `{Resource}sPublic` for lists
+- List responses include `data` array and `count`
+
+## Environment
+
+Key `.env` variables:
+- `POSTGRES_*` - Database connection
+- `SECRET_KEY` - JWT signing (change in production!)
+- `VITE_COPILOT_RUNTIME_URL` - CopilotKit runtime endpoint

@@ -1,0 +1,10 @@
+{
+  "name": "fastapi-full-stack-template",
+  "private": true,
+  "scripts": {
+    "dev": "cd frontend && bun run dev",
+    "lint": "cd frontend && bun run lint",
+    "test": "cd frontend && bun run test",
+    "test:ui": "cd frontend && bun run test:ui"
+  }
+}

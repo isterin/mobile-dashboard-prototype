@@ -1,0 +1,36 @@
+# Local development infrastructure
+# Usage: docker compose -f compose.local.yml up -d
+# Or use: task dev-infra
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: study-status-postgres
+    environment:
+      POSTGRES_USER: studystatus
+      POSTGRES_PASSWORD: studystatus
+      POSTGRES_DB: studystatus
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U studystatus"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  adminer:
+    image: adminer
+    container_name: study-status-adminer
+    environment:
+      ADMINER_DESIGN: pepa-linha-dark
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
