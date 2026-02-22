@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import { IndicationsService } from "@/client"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -58,6 +58,14 @@ export function IndicationDashboard() {
     string | null
   >(null)
   const [activeTab, setActiveTab] = useState("market")
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  // Reset scroll position when switching tabs
+  useEffect(() => {
+    if (activeTab) {
+      scrollContainerRef.current?.scrollTo(0, 0)
+    }
+  }, [activeTab])
 
   // Fetch indication list
   const indicationsQuery = useQuery({
@@ -150,7 +158,10 @@ export function IndicationDashboard() {
           className="flex min-h-0 flex-1 flex-col"
         >
           {/* Scrollable content area */}
-          <div className="flex-1 overflow-auto px-4 pb-20 pt-4 md:px-5">
+          <div
+            ref={scrollContainerRef}
+            className="flex-1 overflow-auto px-4 pb-20 pt-4 md:px-5"
+          >
             <TabsContent value="market" className="mt-0">
               <MarketOverview data={dashboardData} />
             </TabsContent>
