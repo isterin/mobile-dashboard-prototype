@@ -558,3 +558,61 @@ class AiAssessment(AiAssessmentBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
 
     indication: Indication | None = Relationship(back_populates="ai_assessments")
+
+
+# =============================================================================
+# Composite Dashboard Response
+# =============================================================================
+
+
+class TargetWithDrugs(TargetPublic):
+    """Target with the brand names of compounds pursuing it."""
+
+    drug_names: list[str] = []
+
+
+class TrialWithCompound(TrialPublic):
+    """Trial enriched with compound brand name and sponsor."""
+
+    compound_brand_name: str
+    compound_sponsor: str
+
+
+class MarketedDrugWithCompound(MarketedDrugDataPublic):
+    """Marketed drug data enriched with compound info."""
+
+    compound_brand_name: str
+    compound_has_black_box_warning: bool = False
+
+
+class DashboardPublic(SQLModel):
+    """Composite response containing all dashboard data for a single indication."""
+
+    # Layer 1 — Indication Market Overview
+    indication: IndicationPublic
+    patient_populations: list[PatientPopulationPublic]
+    standards_of_care: list[StandardOfCarePublic]
+    unmet_needs: list[UnmetNeedPublic]
+
+    # Layer 2 — Target & Mechanism Landscape
+    targets: list[TargetWithDrugs]
+
+    # Layer 3 — Competitive Compound Grid
+    compounds: list[CompoundPublic]
+
+    # Layer 4 — Competitor Trial Tracker
+    trials: list[TrialWithCompound]
+
+    # Layer 5 — On-Market Performance
+    marketed_drugs: list[MarketedDrugWithCompound]
+
+    # Layer 6 — Expansion Opportunity
+    expansion_indications: list[ExpansionIndicationPublic]
+
+    # Layer 7 — Investment Thesis
+    comparable_transactions: list[ComparableTransactionPublic]
+    thesis_risks: list[ThesisRiskPublic]
+    go_nogo_criteria: list[GoNoGoCriterionPublic]
+
+    # Cross-layer — AI Assessments
+    ai_assessments: list[AiAssessmentPublic]

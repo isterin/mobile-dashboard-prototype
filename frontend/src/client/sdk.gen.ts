@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { AgentAdkEndpointData, AgentAdkEndpointResponse, AgentAgentsStateEndpointData, AgentAgentsStateEndpointResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { AgentAdkEndpointData, AgentAdkEndpointResponse, AgentAgentsStateEndpointData, AgentAgentsStateEndpointResponse, IndicationsListIndicationsResponse, IndicationsGetIndicationData, IndicationsGetIndicationResponse, IndicationsGetDashboardData, IndicationsGetDashboardResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class AgentService {
     /**
@@ -53,6 +53,83 @@ export class AgentService {
             url: '/agent/agents/state',
             body: data.requestBody,
             mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class IndicationsService {
+    /**
+     * List Indications
+     * List all indications.
+     *
+     * Returns:
+     * All indications with their count.
+     * @returns IndicationsPublic Successful Response
+     * @throws ApiError
+     */
+    public static listIndications(): CancelablePromise<IndicationsListIndicationsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/indications/'
+        });
+    }
+    
+    /**
+     * Get Indication
+     * Get a single indication by ID.
+     *
+     * Args:
+     * session: Database session.
+     * indication_id: UUID of the indication.
+     *
+     * Returns:
+     * The indication details.
+     * @param data The data for the request.
+     * @param data.indicationId
+     * @returns IndicationPublic Successful Response
+     * @throws ApiError
+     */
+    public static getIndication(data: IndicationsGetIndicationData): CancelablePromise<IndicationsGetIndicationResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/indications/{indication_id}',
+            path: {
+                indication_id: data.indicationId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Dashboard
+     * Get the full competitive intelligence dashboard for an indication.
+     *
+     * Loads all data across all 7 layers in a single request to avoid
+     * waterfall requests from the frontend.
+     *
+     * Args:
+     * session: Database session.
+     * indication_id: UUID of the indication.
+     *
+     * Returns:
+     * Composite dashboard data spanning all layers.
+     * @param data The data for the request.
+     * @param data.indicationId
+     * @returns DashboardPublic Successful Response
+     * @throws ApiError
+     */
+    public static getDashboard(data: IndicationsGetDashboardData): CancelablePromise<IndicationsGetDashboardResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/indications/{indication_id}/dashboard/',
+            path: {
+                indication_id: data.indicationId
+            },
             errors: {
                 422: 'Validation Error'
             }

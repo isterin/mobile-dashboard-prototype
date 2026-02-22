@@ -26,6 +26,15 @@ export type AgentStateRequest = {
     properties?: (unknown | null);
 };
 
+export type AiAssessmentPublic = {
+    layer: number;
+    title?: (string | null);
+    content: string;
+    generated_at?: string;
+    indication_id: string;
+    id: string;
+};
+
 /**
  * An assistant message.
  */
@@ -51,6 +60,36 @@ export type BinaryInputContent = {
     [key: string]: unknown | "binary" | string;
 };
 
+export type ComparableTransactionPublic = {
+    date: string;
+    transaction_type: string;
+    parties: string;
+    asset: string;
+    total_value?: (string | null);
+    upfront_value?: (string | null);
+    indication_id: string;
+    id: string;
+};
+
+export type CompoundPublic = {
+    brand_name: string;
+    inn?: (string | null);
+    sponsor: string;
+    moa: string;
+    phase: string;
+    route?: (string | null);
+    frequency?: (string | null);
+    primary_efficacy_measure?: (string | null);
+    primary_efficacy_value?: (string | null);
+    onset_of_action?: (string | null);
+    safety_profile?: (string | null);
+    has_black_box_warning?: boolean;
+    regulatory_designations?: (string | null);
+    approval_year?: (number | null);
+    indication_id: string;
+    id: string;
+};
+
 /**
  * Additional context for the agent.
  */
@@ -58,6 +97,25 @@ export type Context = {
     description: string;
     value: string;
     [key: string]: unknown | string;
+};
+
+/**
+ * Composite response containing all dashboard data for a single indication.
+ */
+export type DashboardPublic = {
+    indication: IndicationPublic;
+    patient_populations: Array<PatientPopulationPublic>;
+    standards_of_care: Array<StandardOfCarePublic>;
+    unmet_needs: Array<UnmetNeedPublic>;
+    targets: Array<TargetWithDrugs>;
+    compounds: Array<CompoundPublic>;
+    trials: Array<TrialWithCompound>;
+    marketed_drugs: Array<MarketedDrugWithCompound>;
+    expansion_indications: Array<ExpansionIndicationPublic>;
+    comparable_transactions: Array<ComparableTransactionPublic>;
+    thesis_risks: Array<ThesisRiskPublic>;
+    go_nogo_criteria: Array<GoNoGoCriterionPublic>;
+    ai_assessments: Array<AiAssessmentPublic>;
 };
 
 /**
@@ -71,6 +129,17 @@ export type DeveloperMessage = {
     [key: string]: unknown | string | "developer";
 };
 
+export type ExpansionIndicationPublic = {
+    name: string;
+    market_size_usd_bn?: (number | null);
+    patient_population?: (string | null);
+    competitive_density?: (string | null);
+    validation_status?: (string | null);
+    scientific_rationale?: (string | null);
+    indication_id: string;
+    id: string;
+};
+
 /**
  * Name and arguments of a function call.
  */
@@ -80,8 +149,72 @@ export type FunctionCall = {
     [key: string]: unknown | string;
 };
 
+export type GoNoGoCriterionPublic = {
+    description: string;
+    is_met?: (boolean | null);
+    sort_order?: number;
+    indication_id: string;
+    id: string;
+};
+
 export type HTTPValidationError = {
     detail?: Array<ValidationError>;
+};
+
+export type IndicationPublic = {
+    name: string;
+    icd_code?: (string | null);
+    market_size_usd_bn?: (number | null);
+    market_growth_pct?: (number | null);
+    market_year?: (number | null);
+    market_history?: Array<(number)>;
+    market_years?: Array<(string)>;
+    projected_size_usd_bn?: (number | null);
+    projected_year?: (string | null);
+    cagr_pct?: (string | null);
+    pipeline_phase1?: number;
+    pipeline_phase2?: number;
+    pipeline_phase3?: number;
+    pipeline_filed?: number;
+    pipeline_marketed?: number;
+    pipeline_total?: number;
+    id: string;
+    created_at: string;
+};
+
+export type IndicationsPublic = {
+    data: Array<IndicationPublic>;
+    count: number;
+};
+
+/**
+ * Marketed drug data enriched with compound info.
+ */
+export type MarketedDrugWithCompound = {
+    revenue_history_m?: Array<(number)>;
+    revenue_years?: Array<(string)>;
+    market_share_pct?: (number | null);
+    share_change_pct?: (number | null);
+    wac_price_usd?: (number | null);
+    formulary_access_pct?: (string | null);
+    nbrx_volume?: (string | null);
+    nbrx_trend?: (string | null);
+    has_post_market_safety_flag?: boolean;
+    safety_flag_detail?: (string | null);
+    compound_id: string;
+    id: string;
+    compound_brand_name: string;
+    compound_has_black_box_warning?: boolean;
+};
+
+export type PatientPopulationPublic = {
+    total_prevalence: number;
+    diagnosed: number;
+    treatable: number;
+    treated: number;
+    unit?: string;
+    indication_id: string;
+    id: string;
 };
 
 /**
@@ -99,6 +232,15 @@ export type RunAgentInput = {
     [key: string]: unknown | string | Tool | Context;
 };
 
+export type StandardOfCarePublic = {
+    name: string;
+    line_of_therapy: string;
+    limitation: string;
+    sort_order?: number;
+    indication_id: string;
+    id: string;
+};
+
 /**
  * A system message.
  */
@@ -111,12 +253,36 @@ export type SystemMessage = {
 };
 
 /**
+ * Target with the brand names of compounds pursuing it.
+ */
+export type TargetWithDrugs = {
+    name: string;
+    target_class: string;
+    most_advanced_phase: string;
+    has_marketed_drug?: boolean;
+    crowding: string;
+    compound_count?: number;
+    indication_id: string;
+    id: string;
+    drug_names?: Array<(string)>;
+};
+
+/**
  * A text fragment in a multimodal user message.
  */
 export type TextInputContent = {
     type?: "text";
     text: string;
     [key: string]: unknown | "text" | string;
+};
+
+export type ThesisRiskPublic = {
+    risk: string;
+    detail: string;
+    severity: string;
+    sort_order?: number;
+    indication_id: string;
+    id: string;
 };
 
 /**
@@ -152,6 +318,33 @@ export type ToolMessage = {
 };
 
 /**
+ * Trial enriched with compound brand name and sponsor.
+ */
+export type TrialWithCompound = {
+    trial_name: string;
+    phase: string;
+    target_enrollment?: (number | null);
+    current_enrollment_pct?: (number | null);
+    enrollment_velocity?: (string | null);
+    status?: (string | null);
+    primary_completion_date?: (string | null);
+    primary_endpoint?: (string | null);
+    endpoint_timepoint?: (string | null);
+    comparator?: (string | null);
+    compound_id: string;
+    id: string;
+    compound_brand_name: string;
+    compound_sponsor: string;
+};
+
+export type UnmetNeedPublic = {
+    description: string;
+    sort_order?: number;
+    indication_id: string;
+    id: string;
+};
+
+/**
  * A user message supporting text or multimodal content.
  */
 export type UserMessage = {
@@ -179,5 +372,19 @@ export type AgentAgentsStateEndpointData = {
 };
 
 export type AgentAgentsStateEndpointResponse = (unknown);
+
+export type IndicationsListIndicationsResponse = (IndicationsPublic);
+
+export type IndicationsGetIndicationData = {
+    indicationId: string;
+};
+
+export type IndicationsGetIndicationResponse = (IndicationPublic);
+
+export type IndicationsGetDashboardData = {
+    indicationId: string;
+};
+
+export type IndicationsGetDashboardResponse = (DashboardPublic);
 
 export type UtilsHealthCheckResponse = (boolean);

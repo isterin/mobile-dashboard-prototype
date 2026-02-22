@@ -4,6 +4,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import { Component, type ReactNode, useState } from "react"
 
 import { CopilotChatSidebar } from "@/components/Chat"
+import { IndicationDashboard } from "@/components/Dashboard"
 import { MedidataHeader } from "@/components/MedidataHeader"
 
 export const Route = createFileRoute("/_layout/")({
@@ -69,15 +70,8 @@ function DashboardPage() {
       {/* Main content area below header */}
       <div className="flex min-h-0 flex-1">
         {/* Dashboard content */}
-        <div className="flex-1 overflow-auto p-6 md:p-8">
-          <div className="rounded-lg border border-dashed p-8 text-center">
-            <h2 className="text-lg font-semibold text-muted-foreground">
-              Dashboard Content
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Add your dashboard components here.
-            </p>
-          </div>
+        <div className="min-h-0 flex-1 overflow-hidden">
+          <IndicationDashboard />
         </div>
 
         {/* CopilotKit Chat Sidebar — only rendered when open */}

@@ -86,6 +86,48 @@ export const AgentStateRequestSchema = {
 EXPERIMENTAL: This endpoint is subject to change in future versions.`
 } as const;
 
+export const AiAssessmentPublicSchema = {
+    properties: {
+        layer: {
+            type: 'integer',
+            title: 'Layer'
+        },
+        title: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Title'
+        },
+        content: {
+            type: 'string',
+            title: 'Content'
+        },
+        generated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Generated At'
+        },
+        indication_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Indication Id'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['layer', 'content', 'indication_id', 'id'],
+    title: 'AiAssessmentPublic'
+} as const;
+
 export const AssistantMessageSchema = {
     properties: {
         id: {
@@ -206,6 +248,200 @@ export const BinaryInputContentSchema = {
     description: 'A binary payload reference in a multimodal user message.'
 } as const;
 
+export const ComparableTransactionPublicSchema = {
+    properties: {
+        date: {
+            type: 'string',
+            title: 'Date'
+        },
+        transaction_type: {
+            type: 'string',
+            title: 'Transaction Type'
+        },
+        parties: {
+            type: 'string',
+            title: 'Parties'
+        },
+        asset: {
+            type: 'string',
+            title: 'Asset'
+        },
+        total_value: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Total Value'
+        },
+        upfront_value: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Upfront Value'
+        },
+        indication_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Indication Id'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['date', 'transaction_type', 'parties', 'asset', 'indication_id', 'id'],
+    title: 'ComparableTransactionPublic'
+} as const;
+
+export const CompoundPublicSchema = {
+    properties: {
+        brand_name: {
+            type: 'string',
+            title: 'Brand Name'
+        },
+        inn: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Inn'
+        },
+        sponsor: {
+            type: 'string',
+            title: 'Sponsor'
+        },
+        moa: {
+            type: 'string',
+            title: 'Moa'
+        },
+        phase: {
+            type: 'string',
+            title: 'Phase'
+        },
+        route: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Route'
+        },
+        frequency: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Frequency'
+        },
+        primary_efficacy_measure: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Primary Efficacy Measure'
+        },
+        primary_efficacy_value: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Primary Efficacy Value'
+        },
+        onset_of_action: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Onset Of Action'
+        },
+        safety_profile: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Safety Profile'
+        },
+        has_black_box_warning: {
+            type: 'boolean',
+            title: 'Has Black Box Warning',
+            default: false
+        },
+        regulatory_designations: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Regulatory Designations'
+        },
+        approval_year: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Approval Year'
+        },
+        indication_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Indication Id'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['brand_name', 'sponsor', 'moa', 'phase', 'indication_id', 'id'],
+    title: 'CompoundPublic'
+} as const;
+
 export const ContextSchema = {
     properties: {
         description: {
@@ -222,6 +458,102 @@ export const ContextSchema = {
     required: ['description', 'value'],
     title: 'Context',
     description: 'Additional context for the agent.'
+} as const;
+
+export const DashboardPublicSchema = {
+    properties: {
+        indication: {
+            '$ref': '#/components/schemas/IndicationPublic'
+        },
+        patient_populations: {
+            items: {
+                '$ref': '#/components/schemas/PatientPopulationPublic'
+            },
+            type: 'array',
+            title: 'Patient Populations'
+        },
+        standards_of_care: {
+            items: {
+                '$ref': '#/components/schemas/StandardOfCarePublic'
+            },
+            type: 'array',
+            title: 'Standards Of Care'
+        },
+        unmet_needs: {
+            items: {
+                '$ref': '#/components/schemas/UnmetNeedPublic'
+            },
+            type: 'array',
+            title: 'Unmet Needs'
+        },
+        targets: {
+            items: {
+                '$ref': '#/components/schemas/TargetWithDrugs'
+            },
+            type: 'array',
+            title: 'Targets'
+        },
+        compounds: {
+            items: {
+                '$ref': '#/components/schemas/CompoundPublic'
+            },
+            type: 'array',
+            title: 'Compounds'
+        },
+        trials: {
+            items: {
+                '$ref': '#/components/schemas/TrialWithCompound'
+            },
+            type: 'array',
+            title: 'Trials'
+        },
+        marketed_drugs: {
+            items: {
+                '$ref': '#/components/schemas/MarketedDrugWithCompound'
+            },
+            type: 'array',
+            title: 'Marketed Drugs'
+        },
+        expansion_indications: {
+            items: {
+                '$ref': '#/components/schemas/ExpansionIndicationPublic'
+            },
+            type: 'array',
+            title: 'Expansion Indications'
+        },
+        comparable_transactions: {
+            items: {
+                '$ref': '#/components/schemas/ComparableTransactionPublic'
+            },
+            type: 'array',
+            title: 'Comparable Transactions'
+        },
+        thesis_risks: {
+            items: {
+                '$ref': '#/components/schemas/ThesisRiskPublic'
+            },
+            type: 'array',
+            title: 'Thesis Risks'
+        },
+        go_nogo_criteria: {
+            items: {
+                '$ref': '#/components/schemas/GoNoGoCriterionPublic'
+            },
+            type: 'array',
+            title: 'Go Nogo Criteria'
+        },
+        ai_assessments: {
+            items: {
+                '$ref': '#/components/schemas/AiAssessmentPublic'
+            },
+            type: 'array',
+            title: 'Ai Assessments'
+        }
+    },
+    type: 'object',
+    required: ['indication', 'patient_populations', 'standards_of_care', 'unmet_needs', 'targets', 'compounds', 'trials', 'marketed_drugs', 'expansion_indications', 'comparable_transactions', 'thesis_risks', 'go_nogo_criteria', 'ai_assessments'],
+    title: 'DashboardPublic',
+    description: 'Composite response containing all dashboard data for a single indication.'
 } as const;
 
 export const DeveloperMessageSchema = {
@@ -259,6 +591,83 @@ export const DeveloperMessageSchema = {
     description: 'A developer message.'
 } as const;
 
+export const ExpansionIndicationPublicSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        market_size_usd_bn: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Market Size Usd Bn'
+        },
+        patient_population: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Patient Population'
+        },
+        competitive_density: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Competitive Density'
+        },
+        validation_status: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Validation Status'
+        },
+        scientific_rationale: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Scientific Rationale'
+        },
+        indication_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Indication Id'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['name', 'indication_id', 'id'],
+    title: 'ExpansionIndicationPublic'
+} as const;
+
 export const FunctionCallSchema = {
     properties: {
         name: {
@@ -277,6 +686,44 @@ export const FunctionCallSchema = {
     description: 'Name and arguments of a function call.'
 } as const;
 
+export const GoNoGoCriterionPublicSchema = {
+    properties: {
+        description: {
+            type: 'string',
+            title: 'Description'
+        },
+        is_met: {
+            anyOf: [
+                {
+                    type: 'boolean'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Is Met'
+        },
+        sort_order: {
+            type: 'integer',
+            title: 'Sort Order',
+            default: 0
+        },
+        indication_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Indication Id'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['description', 'indication_id', 'id'],
+    title: 'GoNoGoCriterionPublic'
+} as const;
+
 export const HTTPValidationErrorSchema = {
     properties: {
         detail: {
@@ -289,6 +736,332 @@ export const HTTPValidationErrorSchema = {
     },
     type: 'object',
     title: 'HTTPValidationError'
+} as const;
+
+export const IndicationPublicSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        icd_code: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Icd Code'
+        },
+        market_size_usd_bn: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Market Size Usd Bn'
+        },
+        market_growth_pct: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Market Growth Pct'
+        },
+        market_year: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Market Year'
+        },
+        market_history: {
+            items: {
+                type: 'number'
+            },
+            type: 'array',
+            title: 'Market History'
+        },
+        market_years: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Market Years'
+        },
+        projected_size_usd_bn: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Projected Size Usd Bn'
+        },
+        projected_year: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Projected Year'
+        },
+        cagr_pct: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Cagr Pct'
+        },
+        pipeline_phase1: {
+            type: 'integer',
+            title: 'Pipeline Phase1',
+            default: 0
+        },
+        pipeline_phase2: {
+            type: 'integer',
+            title: 'Pipeline Phase2',
+            default: 0
+        },
+        pipeline_phase3: {
+            type: 'integer',
+            title: 'Pipeline Phase3',
+            default: 0
+        },
+        pipeline_filed: {
+            type: 'integer',
+            title: 'Pipeline Filed',
+            default: 0
+        },
+        pipeline_marketed: {
+            type: 'integer',
+            title: 'Pipeline Marketed',
+            default: 0
+        },
+        pipeline_total: {
+            type: 'integer',
+            title: 'Pipeline Total',
+            default: 0
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: ['name', 'id', 'created_at'],
+    title: 'IndicationPublic'
+} as const;
+
+export const IndicationsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/IndicationPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'IndicationsPublic'
+} as const;
+
+export const MarketedDrugWithCompoundSchema = {
+    properties: {
+        revenue_history_m: {
+            items: {
+                type: 'number'
+            },
+            type: 'array',
+            title: 'Revenue History M'
+        },
+        revenue_years: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Revenue Years'
+        },
+        market_share_pct: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Market Share Pct'
+        },
+        share_change_pct: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Share Change Pct'
+        },
+        wac_price_usd: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Wac Price Usd'
+        },
+        formulary_access_pct: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Formulary Access Pct'
+        },
+        nbrx_volume: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Nbrx Volume'
+        },
+        nbrx_trend: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Nbrx Trend'
+        },
+        has_post_market_safety_flag: {
+            type: 'boolean',
+            title: 'Has Post Market Safety Flag',
+            default: false
+        },
+        safety_flag_detail: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Safety Flag Detail'
+        },
+        compound_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Compound Id'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        compound_brand_name: {
+            type: 'string',
+            title: 'Compound Brand Name'
+        },
+        compound_has_black_box_warning: {
+            type: 'boolean',
+            title: 'Compound Has Black Box Warning',
+            default: false
+        }
+    },
+    type: 'object',
+    required: ['compound_id', 'id', 'compound_brand_name'],
+    title: 'MarketedDrugWithCompound',
+    description: 'Marketed drug data enriched with compound info.'
+} as const;
+
+export const PatientPopulationPublicSchema = {
+    properties: {
+        total_prevalence: {
+            type: 'number',
+            title: 'Total Prevalence'
+        },
+        diagnosed: {
+            type: 'number',
+            title: 'Diagnosed'
+        },
+        treatable: {
+            type: 'number',
+            title: 'Treatable'
+        },
+        treated: {
+            type: 'number',
+            title: 'Treated'
+        },
+        unit: {
+            type: 'string',
+            title: 'Unit',
+            default: 'M (US+EU5)'
+        },
+        indication_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Indication Id'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['total_prevalence', 'diagnosed', 'treatable', 'treated', 'indication_id', 'id'],
+    title: 'PatientPopulationPublic'
 } as const;
 
 export const RunAgentInputSchema = {
@@ -377,6 +1150,42 @@ export const RunAgentInputSchema = {
     description: 'Input for running an agent.'
 } as const;
 
+export const StandardOfCarePublicSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        line_of_therapy: {
+            type: 'string',
+            maxLength: 20,
+            title: 'Line Of Therapy'
+        },
+        limitation: {
+            type: 'string',
+            title: 'Limitation'
+        },
+        sort_order: {
+            type: 'integer',
+            title: 'Sort Order',
+            default: 0
+        },
+        indication_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Indication Id'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['name', 'line_of_therapy', 'limitation', 'indication_id', 'id'],
+    title: 'StandardOfCarePublic'
+} as const;
+
 export const SystemMessageSchema = {
     properties: {
         id: {
@@ -412,6 +1221,60 @@ export const SystemMessageSchema = {
     description: 'A system message.'
 } as const;
 
+export const TargetWithDrugsSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        target_class: {
+            type: 'string',
+            title: 'Target Class'
+        },
+        most_advanced_phase: {
+            type: 'string',
+            title: 'Most Advanced Phase'
+        },
+        has_marketed_drug: {
+            type: 'boolean',
+            title: 'Has Marketed Drug',
+            default: false
+        },
+        crowding: {
+            type: 'string',
+            maxLength: 10,
+            title: 'Crowding'
+        },
+        compound_count: {
+            type: 'integer',
+            title: 'Compound Count',
+            default: 0
+        },
+        indication_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Indication Id'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        drug_names: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Drug Names',
+            default: []
+        }
+    },
+    type: 'object',
+    required: ['name', 'target_class', 'most_advanced_phase', 'crowding', 'indication_id', 'id'],
+    title: 'TargetWithDrugs',
+    description: 'Target with the brand names of compounds pursuing it.'
+} as const;
+
 export const TextInputContentSchema = {
     properties: {
         type: {
@@ -430,6 +1293,42 @@ export const TextInputContentSchema = {
     required: ['text'],
     title: 'TextInputContent',
     description: 'A text fragment in a multimodal user message.'
+} as const;
+
+export const ThesisRiskPublicSchema = {
+    properties: {
+        risk: {
+            type: 'string',
+            title: 'Risk'
+        },
+        detail: {
+            type: 'string',
+            title: 'Detail'
+        },
+        severity: {
+            type: 'string',
+            maxLength: 10,
+            title: 'Severity'
+        },
+        sort_order: {
+            type: 'integer',
+            title: 'Sort Order',
+            default: 0
+        },
+        indication_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Indication Id'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['risk', 'detail', 'severity', 'indication_id', 'id'],
+    title: 'ThesisRiskPublic'
 } as const;
 
 export const ToolSchema = {
@@ -513,6 +1412,156 @@ export const ToolMessageSchema = {
     required: ['id', 'content', 'toolCallId'],
     title: 'ToolMessage',
     description: 'A tool result message.'
+} as const;
+
+export const TrialWithCompoundSchema = {
+    properties: {
+        trial_name: {
+            type: 'string',
+            title: 'Trial Name'
+        },
+        phase: {
+            type: 'string',
+            title: 'Phase'
+        },
+        target_enrollment: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Target Enrollment'
+        },
+        current_enrollment_pct: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Current Enrollment Pct'
+        },
+        enrollment_velocity: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Enrollment Velocity'
+        },
+        status: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Status'
+        },
+        primary_completion_date: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Primary Completion Date'
+        },
+        primary_endpoint: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Primary Endpoint'
+        },
+        endpoint_timepoint: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Endpoint Timepoint'
+        },
+        comparator: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Comparator'
+        },
+        compound_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Compound Id'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        compound_brand_name: {
+            type: 'string',
+            title: 'Compound Brand Name'
+        },
+        compound_sponsor: {
+            type: 'string',
+            title: 'Compound Sponsor'
+        }
+    },
+    type: 'object',
+    required: ['trial_name', 'phase', 'compound_id', 'id', 'compound_brand_name', 'compound_sponsor'],
+    title: 'TrialWithCompound',
+    description: 'Trial enriched with compound brand name and sponsor.'
+} as const;
+
+export const UnmetNeedPublicSchema = {
+    properties: {
+        description: {
+            type: 'string',
+            title: 'Description'
+        },
+        sort_order: {
+            type: 'integer',
+            title: 'Sort Order',
+            default: 0
+        },
+        indication_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Indication Id'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['description', 'indication_id', 'id'],
+    title: 'UnmetNeedPublic'
 } as const;
 
 export const UserMessageSchema = {
