@@ -1,7 +1,6 @@
-import { useQuery } from "@tanstack/react-query"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 
-import { IndicationsService } from "@/client"
+import type { DashboardPublic, IndicationPublic } from "@/client"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 import { CompoundGrid } from "./layers/CompoundGrid"
@@ -53,11 +52,29 @@ const TAB_TITLES: Record<string, { title: string; subtitle: string }> = {
   },
 }
 
-export function IndicationDashboard() {
-  const [selectedIndicationId, setSelectedIndicationId] = useState<
-    string | null
-  >(null)
-  const [activeTab, setActiveTab] = useState("market")
+interface IndicationDashboardProps {
+  indications: IndicationPublic[]
+  selectedIndicationId: string | null
+  onSelectIndication: (id: string) => void
+  activeTab: string
+  onChangeTab: (tab: string) => void
+  dashboardData: DashboardPublic | undefined
+  isLoadingIndications: boolean
+  isLoadingDashboard: boolean
+  dashboardError: boolean
+}
+
+export function IndicationDashboard({
+  indications,
+  selectedIndicationId,
+  onSelectIndication,
+  activeTab,
+  onChangeTab,
+  dashboardData,
+  isLoadingIndications,
+  isLoadingDashboard,
+  dashboardError,
+}: IndicationDashboardProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   // Reset scroll position when switching tabs
@@ -67,29 +84,6 @@ export function IndicationDashboard() {
     }
   }, [activeTab])
 
-  // Fetch indication list
-  const indicationsQuery = useQuery({
-    queryKey: ["indications"],
-    queryFn: () => IndicationsService.listIndications(),
-  })
-
-  // Auto-select first indication when data loads
-  const indications = indicationsQuery.data?.data ?? []
-  if (indications.length > 0 && !selectedIndicationId) {
-    setSelectedIndicationId(indications[0].id)
-  }
-
-  // Fetch dashboard data for selected indication
-  const dashboardQuery = useQuery({
-    queryKey: ["dashboard", selectedIndicationId],
-    queryFn: () =>
-      IndicationsService.getDashboard({
-        indicationId: selectedIndicationId!,
-      }),
-    enabled: !!selectedIndicationId,
-  })
-
-  const dashboardData = dashboardQuery.data
   const tabMeta = TAB_TITLES[activeTab]
 
   return (
@@ -103,7 +97,7 @@ export function IndicationDashboard() {
           {/* Indication Selector */}
           <select
             value={selectedIndicationId ?? ""}
-            onChange={(e) => setSelectedIndicationId(e.target.value)}
+            onChange={(e) => onSelectIndication(e.target.value)}
             className="rounded-md border bg-card px-2 py-1 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-ring"
           >
             {indications.map((ind) => (
@@ -126,7 +120,7 @@ export function IndicationDashboard() {
       </div>
 
       {/* Loading / Error states */}
-      {indicationsQuery.isLoading && (
+      {isLoadingIndications && (
         <div className="flex flex-1 items-center justify-center">
           <div className="text-sm text-muted-foreground">
             Loading indications...
@@ -134,7 +128,7 @@ export function IndicationDashboard() {
         </div>
       )}
 
-      {dashboardQuery.isLoading && selectedIndicationId && (
+      {isLoadingDashboard && selectedIndicationId && (
         <div className="flex flex-1 items-center justify-center">
           <div className="text-sm text-muted-foreground">
             Loading dashboard...
@@ -142,7 +136,7 @@ export function IndicationDashboard() {
         </div>
       )}
 
-      {dashboardQuery.error && (
+      {dashboardError && (
         <div className="flex flex-1 items-center justify-center">
           <div className="text-sm text-red-600">
             Failed to load dashboard data. Please try again.
@@ -154,7 +148,7 @@ export function IndicationDashboard() {
       {dashboardData && (
         <Tabs
           value={activeTab}
-          onValueChange={setActiveTab}
+          onValueChange={onChangeTab}
           className="flex min-h-0 flex-1 flex-col"
         >
           {/* Scrollable content area */}

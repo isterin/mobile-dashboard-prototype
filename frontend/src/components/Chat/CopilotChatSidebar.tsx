@@ -2,11 +2,17 @@ import { useCopilotAction, useCopilotReadable } from "@copilotkit/react-core"
 import { CopilotChat } from "@copilotkit/react-ui"
 import { MessageSquareOffIcon, XIcon } from "lucide-react"
 
+import type { DashboardPublic } from "@/client"
 import { Button } from "@/components/ui/button"
 
 interface CopilotChatSidebarProps {
   /** Data to share with the AI assistant via useCopilotReadable */
-  contextData?: Record<string, unknown>
+  contextData?: {
+    page: string
+    activeTab: string
+    selectedIndication: string | null
+    dashboardData: DashboardPublic | null
+  }
   /** Callback to close the sidebar */
   onClose: () => void
   /** Whether the agent is unavailable (runtime not running) */
@@ -16,53 +22,103 @@ interface CopilotChatSidebarProps {
 /**
  * CopilotKit-powered chat sidebar component.
  *
- * This component demonstrates the pattern for integrating CopilotKit:
- * - useCopilotReadable: Share application state with the AI
- * - useCopilotAction: Enable AI to perform actions in the app
- *
- * Customize the useCopilotReadable hooks to share your application's data,
- * and add useCopilotAction hooks to enable AI-driven interactions.
+ * Shares the full dashboard data with the AI assistant via useCopilotReadable,
+ * broken into semantic layers so the AI can reference specific aspects of the
+ * competitive intelligence dashboard in its responses.
  */
 export function CopilotChatSidebar({
   contextData,
   onClose,
   isUnavailable = false,
 }: CopilotChatSidebarProps) {
+  const dashboard = contextData?.dashboardData ?? null
+
   // ==========================================================================
   // Share application context with AI via useCopilotReadable
   // ==========================================================================
-  // Add your own useCopilotReadable hooks here to share relevant data.
-  // The AI will see this in its context and can reference it in responses.
-  //
-  // Example:
-  // useCopilotReadable({
-  //   description: "Currently selected dashboard filters",
-  //   value: JSON.stringify(filters),
-  // })
 
   useCopilotReadable({
-    description: "Application context data",
-    value: JSON.stringify(contextData ?? {}),
+    description:
+      "Current navigation state: which page and tab the user is viewing, and which indication is selected",
+    value: JSON.stringify({
+      page: contextData?.page ?? "dashboard",
+      activeTab: contextData?.activeTab ?? null,
+      selectedIndication: contextData?.selectedIndication ?? null,
+    }),
+  })
+
+  useCopilotReadable({
+    description:
+      "Layer 1 — Indication Market Overview: indication details, market size, growth, pipeline counts, patient populations, standards of care, and unmet needs",
+    value: JSON.stringify({
+      indication: dashboard?.indication ?? null,
+      patient_populations: dashboard?.patient_populations ?? [],
+      standards_of_care: dashboard?.standards_of_care ?? [],
+      unmet_needs: dashboard?.unmet_needs ?? [],
+    }),
+  })
+
+  useCopilotReadable({
+    description:
+      "Layer 2 — Target & Mechanism Landscape: biological targets being pursued, their classes, crowding levels, most advanced development phases, and associated drugs",
+    value: JSON.stringify({
+      targets: dashboard?.targets ?? [],
+    }),
+  })
+
+  useCopilotReadable({
+    description:
+      "Layer 3 — Competitive Compound Grid: compounds in development or on market with sponsor, mechanism of action, phase, efficacy data, and safety profiles",
+    value: JSON.stringify({
+      compounds: dashboard?.compounds ?? [],
+    }),
+  })
+
+  useCopilotReadable({
+    description:
+      "Layer 4 — Competitor Trial Tracker: clinical trials with phase, status, enrollment numbers, start/end dates, and associated compounds",
+    value: JSON.stringify({
+      trials: dashboard?.trials ?? [],
+    }),
+  })
+
+  useCopilotReadable({
+    description:
+      "Layer 5 — On-Market Performance: marketed drugs with revenue history, market share, WAC price, and prescription volume",
+    value: JSON.stringify({
+      marketed_drugs: dashboard?.marketed_drugs ?? [],
+    }),
+  })
+
+  useCopilotReadable({
+    description:
+      "Layer 6 — Expansion Opportunity: potential expansion indications with market size, competitive density, and validation status",
+    value: JSON.stringify({
+      expansion_indications: dashboard?.expansion_indications ?? [],
+    }),
+  })
+
+  useCopilotReadable({
+    description:
+      "Layer 7 — Investment Thesis: comparable transactions, thesis risks with severity, and go/no-go criteria with met/unmet status",
+    value: JSON.stringify({
+      comparable_transactions: dashboard?.comparable_transactions ?? [],
+      thesis_risks: dashboard?.thesis_risks ?? [],
+      go_nogo_criteria: dashboard?.go_nogo_criteria ?? [],
+    }),
+  })
+
+  useCopilotReadable({
+    description:
+      "Cross-layer AI Assessments: AI-generated insights for each dashboard layer including title and detailed content",
+    value: JSON.stringify({
+      ai_assessments: dashboard?.ai_assessments ?? [],
+    }),
   })
 
   // ==========================================================================
   // Enable AI actions via useCopilotAction
   // ==========================================================================
-  // Add your own useCopilotAction hooks here to let the AI perform actions.
-  //
-  // Example:
-  // useCopilotAction({
-  //   name: "applyFilter",
-  //   description: "Apply a filter to the dashboard",
-  //   parameters: [
-  //     { name: "filterType", type: "string", required: true },
-  //     { name: "value", type: "string", required: true },
-  //   ],
-  //   handler: async ({ filterType, value }) => {
-  //     onApplyFilter(filterType, value)
-  //     return `Applied ${filterType} filter: ${value}`
-  //   },
-  // })
 
   useCopilotAction({
     name: "getHelp",
