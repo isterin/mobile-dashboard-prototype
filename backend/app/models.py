@@ -245,8 +245,6 @@ class TargetBase(SQLModel):
     target_class: str
     most_advanced_phase: str
     has_marketed_drug: bool = False
-    crowding: str = Field(max_length=10)  # "high", "medium", "low"
-    compound_count: int = 0
 
     indication_id: uuid.UUID = Field(foreign_key="indication.id")
 
@@ -566,9 +564,11 @@ class AiAssessment(AiAssessmentBase, table=True):
 
 
 class TargetWithCompounds(TargetPublic):
-    """Target with full compound data for each drug pursuing it."""
+    """Target with full compound data and computed competitive metrics."""
 
     compounds: list[CompoundPublic] = []
+    compound_count: int = 0
+    crowding: str = "low"  # Computed: "high", "medium", "low"
 
 
 class TrialWithCompound(TrialPublic):

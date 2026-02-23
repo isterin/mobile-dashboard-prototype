@@ -29,19 +29,24 @@ export function CompetitivePipeline({ data }: CompetitivePipelineProps) {
           {data.targets.map((t) => {
             const size = 38 + (t.compound_count ?? 0) * 12
             const isExpanded = expandedTarget === t.id
-            const bgClass =
+            const crowdingColor =
               t.crowding === "high"
-                ? "bg-red-500/7 border-red-500/12"
+                ? "#D55E00"
                 : t.crowding === "medium"
-                  ? "bg-yellow-500/8 border-yellow-500/20"
-                  : "bg-blue-600/8 border-blue-600/18"
+                  ? "#56B4E9"
+                  : "#009E73"
             return (
               <button
                 type="button"
                 key={t.id}
                 onClick={() => setExpandedTarget(isExpanded ? null : t.id)}
-                className={`flex shrink-0 cursor-pointer flex-col items-center justify-center rounded-full border transition-transform ${bgClass} ${isExpanded ? "scale-110 ring-2 ring-blue-600/20" : ""}`}
-                style={{ width: size, height: size }}
+                className={`flex shrink-0 cursor-pointer flex-col items-center justify-center rounded-full border transition-transform ${isExpanded ? "scale-110 ring-2 ring-blue-600/20" : ""}`}
+                style={{
+                  width: size,
+                  height: size,
+                  backgroundColor: `${crowdingColor}12`,
+                  borderColor: `${crowdingColor}30`,
+                }}
               >
                 <div className="text-center font-mono text-[8px] font-bold leading-tight">
                   {t.name}
@@ -86,7 +91,7 @@ export function CompetitivePipeline({ data }: CompetitivePipelineProps) {
               onClick={() => setExpandedTarget(isOpen ? null : t.id)}
               className="flex w-full cursor-pointer items-center gap-2.5 p-3.5"
             >
-              <CrowdingDot level={t.crowding} />
+              <CrowdingDot level={t.crowding ?? "low"} />
               <div className="flex-1 text-left">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-semibold">{t.name}</span>
@@ -100,13 +105,15 @@ export function CompetitivePipeline({ data }: CompetitivePipelineProps) {
                     {compounds.length !== 1 ? "s" : ""}
                   </span>
                   <span
-                    className={`text-[9px] font-semibold uppercase tracking-wide ${
-                      t.crowding === "high"
-                        ? "text-red-500"
-                        : t.crowding === "medium"
-                          ? "text-yellow-500"
-                          : "text-green-500"
-                    }`}
+                    className="text-[9px] font-semibold uppercase tracking-wide"
+                    style={{
+                      color:
+                        t.crowding === "high"
+                          ? "#D55E00"
+                          : t.crowding === "medium"
+                            ? "#56B4E9"
+                            : "#009E73",
+                    }}
                   >
                     {t.crowding}
                   </span>

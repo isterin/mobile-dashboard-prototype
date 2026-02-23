@@ -36,6 +36,44 @@ from app.models import (
 
 router = APIRouter(prefix="/indications", tags=["indications"])
 
+# Phase → score weights for competitive crowding calculation
+_PHASE_SCORES: dict[str, int] = {
+    "Phase 1": 1,
+    "Phase 2": 2,
+    "Phase 3": 4,
+    "Filed": 6,
+    "Marketed": 8,
+}
+
+
+def _compute_crowding(compounds: list[CompoundPublic]) -> str:
+    """Compute competitive crowding level from linked compounds.
+
+    Scoring:
+      - Each compound contributes points based on its phase
+        (Phase 1=1, Phase 2=2, Phase 3=4, Filed=6, Marketed=8)
+      - Bonus +2 if compounds come from >2 distinct sponsors
+
+    Thresholds:
+      - score >= 10 → "high"
+      - score >= 4  → "medium"
+      - score < 4   → "low"
+    """
+    if not compounds:
+        return "low"
+
+    score = sum(_PHASE_SCORES.get(c.phase, 1) for c in compounds)
+
+    unique_sponsors = {c.sponsor for c in compounds}
+    if len(unique_sponsors) > 2:
+        score += 2
+
+    if score >= 10:
+        return "high"
+    if score >= 4:
+        return "medium"
+    return "low"
+
 
 @router.get("/{indication_id}/dashboard/", response_model=DashboardPublic)
 def get_dashboard(session: SessionDep, indication_id: uuid.UUID) -> DashboardPublic:
@@ -79,13 +117,22 @@ def get_dashboard(session: SessionDep, indication_id: uuid.UUID) -> DashboardPub
     targets_raw = session.exec(
         select(Target).where(Target.indication_id == indication_id)
     ).all()
-    targets_raw = sorted(targets_raw, key=lambda t: t.compound_count, reverse=True)
 
     targets: list[TargetWithCompounds] = []
     for t in targets_raw:
         compounds = [CompoundPublic.model_validate(c) for c in t.compounds]
+        compound_count = len(compounds)
+        crowding = _compute_crowding(compounds)
         base = TargetPublic.model_validate(t).model_dump()
-        targets.append(TargetWithCompounds(**base, compounds=compounds))
+        targets.append(
+            TargetWithCompounds(
+                **base,
+                compounds=compounds,
+                compound_count=compound_count,
+                crowding=crowding,
+            )
+        )
+    targets.sort(key=lambda t: t.compound_count, reverse=True)
 
     # Layer 3 — Trials (flattened with compound info)
     trials_raw = session.exec(

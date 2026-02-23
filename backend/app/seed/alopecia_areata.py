@@ -124,13 +124,13 @@ def seed_alopecia_areata(session: Session) -> None:
 
     # ── Targets ──────────────────────────────────────────────────────────
     targets_data = [
-        ("JAK1/JAK2", "Kinase", "Marketed", True, "high", 3),
-        ("JAK3/TEC", "Kinase", "Marketed", True, "medium", 2),
-        ("JAK1", "Kinase", "Phase 3", False, "medium", 2),
-        ("IL-15", "Cytokine", "Phase 2", False, "low", 2),
-        ("IL-17A", "Cytokine", "Phase 2", False, "low", 1),
-        ("Deuruxolitinib (TYK2/JAK1)", "Kinase", "Phase 3", False, "medium", 1),
-        ("Oral CGRP", "Neuropeptide", "Phase 1", False, "low", 1),
+        ("JAK1/JAK2", "Kinase", "Marketed", True),
+        ("JAK3/TEC", "Kinase", "Marketed", True),
+        ("JAK1", "Kinase", "Phase 3", False),
+        ("IL-15", "Cytokine", "Phase 2", False),
+        ("IL-17A", "Cytokine", "Phase 2", False),
+        ("Deuruxolitinib (TYK2/JAK1)", "Kinase", "Phase 3", False),
+        ("Oral CGRP", "Neuropeptide", "Phase 1", False),
     ]
     targets = {}
     for td in targets_data:
@@ -139,8 +139,6 @@ def seed_alopecia_areata(session: Session) -> None:
             target_class=td[1],
             most_advanced_phase=td[2],
             has_marketed_drug=td[3],
-            crowding=td[4],
-            compound_count=td[5],
             indication_id=indication.id,
         )
         session.add(t)

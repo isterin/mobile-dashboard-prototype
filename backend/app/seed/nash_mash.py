@@ -129,15 +129,15 @@ def seed_nash_mash(session: Session) -> None:
 
     # ── Targets ──────────────────────────────────────────────────────────
     targets_data = [
-        ("THR-β", "Nuclear Receptor", "Marketed", True, "medium", 2),
-        ("FXR", "Nuclear Receptor", "Phase 3", False, "high", 4),
-        ("GLP-1R", "Incretin Receptor", "Phase 3", False, "high", 5),
-        ("GLP-1R/GIPR", "Dual Incretin", "Phase 2", False, "medium", 3),
-        ("FGF21", "Growth Factor", "Phase 2", False, "medium", 3),
-        ("ACC", "Enzyme (Lipogenesis)", "Phase 2", False, "medium", 2),
-        ("PPAR α/δ/γ", "Nuclear Receptor", "Phase 2", False, "low", 2),
-        ("ASK1", "Kinase (Apoptosis)", "Phase 2", False, "low", 1),
-        ("Galectin-3", "Lectin", "Phase 2", False, "low", 1),
+        ("THR-β", "Nuclear Receptor", "Marketed", True),
+        ("FXR", "Nuclear Receptor", "Phase 3", False),
+        ("GLP-1R", "Incretin Receptor", "Phase 3", False),
+        ("GLP-1R/GIPR", "Dual Incretin", "Phase 2", False),
+        ("FGF21", "Growth Factor", "Phase 2", False),
+        ("ACC", "Enzyme (Lipogenesis)", "Phase 2", False),
+        ("PPAR α/δ/γ", "Nuclear Receptor", "Phase 2", False),
+        ("ASK1", "Kinase (Apoptosis)", "Phase 2", False),
+        ("Galectin-3", "Lectin", "Phase 2", False),
     ]
     targets = {}
     for td in targets_data:
@@ -146,8 +146,6 @@ def seed_nash_mash(session: Session) -> None:
             target_class=td[1],
             most_advanced_phase=td[2],
             has_marketed_drug=td[3],
-            crowding=td[4],
-            compound_count=td[5],
             indication_id=indication.id,
         )
         session.add(t)

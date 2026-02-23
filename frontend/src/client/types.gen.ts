@@ -252,18 +252,18 @@ export type SystemMessage = {
 };
 
 /**
- * Target with full compound data for each drug pursuing it.
+ * Target with full compound data and computed competitive metrics.
  */
 export type TargetWithCompounds = {
     name: string;
     target_class: string;
     most_advanced_phase: string;
     has_marketed_drug?: boolean;
-    crowding: string;
-    compound_count?: number;
     indication_id: string;
     id: string;
     compounds?: Array<CompoundPublic>;
+    compound_count?: number;
+    crowding?: string;
 };
 
 /**

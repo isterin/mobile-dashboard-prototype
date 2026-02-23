@@ -1,5 +1,6 @@
 import type { DashboardPublic } from "@/client"
-import { FunnelBar } from "../charts/FunnelBar"
+import { PatientFunnel } from "../charts/PatientFunnel"
+import { PipelineDensity } from "../charts/PipelineDensity"
 import { Sparkline } from "../charts/Sparkline"
 import { AiAssessmentBox } from "../shared/AiAssessmentBox"
 import { Pill } from "../shared/Pill"
@@ -81,33 +82,34 @@ export function MarketOverview({ data }: MarketOverviewProps) {
           <div className="mb-3 font-mono text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
             Patient Population Funnel
           </div>
-          <FunnelBar
-            label="Total Prevalence"
-            value={pop.total_prevalence}
+          <PatientFunnel
             total={pop.total_prevalence}
-            color="#2563eb"
-            unit={`M`}
-          />
-          <FunnelBar
-            label="Diagnosed"
-            value={pop.diagnosed}
-            total={pop.total_prevalence}
-            color="#6366f1"
-            unit={`M`}
-          />
-          <FunnelBar
-            label="Eligible for Systemic Tx"
-            value={pop.treatable}
-            total={pop.total_prevalence}
-            color="#7c3aed"
-            unit={`M`}
-          />
-          <FunnelBar
-            label="Currently Treated (Systemic)"
-            value={pop.treated}
-            total={pop.total_prevalence}
-            color="#db2777"
-            unit={`M`}
+            stages={[
+              {
+                label: "Total Prevalence",
+                value: pop.total_prevalence,
+                color: "#56B4E9",
+                unit: "M",
+              },
+              {
+                label: "Diagnosed",
+                value: pop.diagnosed,
+                color: "#E69F00",
+                unit: "M",
+              },
+              {
+                label: "Eligible for Systemic Tx",
+                value: pop.treatable,
+                color: "#009E73",
+                unit: "M",
+              },
+              {
+                label: "Currently Treated",
+                value: pop.treated,
+                color: "#CC79A7",
+                unit: "M",
+              },
+            ]}
           />
           <div className="mt-2 text-[11px] font-medium text-green-600">
             &rarr; {(pop.treatable - pop.treated).toFixed(0)}M
@@ -170,37 +172,23 @@ export function MarketOverview({ data }: MarketOverviewProps) {
             active programs
           </span>
         </div>
-        <div className="flex h-12 items-end gap-1">
-          {[
-            { label: "Ph1", val: ind.pipeline_phase1, color: "#2563eb" },
-            { label: "Ph2", val: ind.pipeline_phase2, color: "#6366f1" },
-            { label: "Ph3", val: ind.pipeline_phase3, color: "#7c3aed" },
-            { label: "Filed", val: ind.pipeline_filed, color: "#db2777" },
-            { label: "Mktd", val: ind.pipeline_marketed, color: "#16a34a" },
-          ].map((b) => (
-            <div
-              key={b.label}
-              className="flex flex-1 flex-col items-center gap-1"
-            >
-              <span
-                className="font-mono text-[10px] font-semibold"
-                style={{ color: b.color }}
-              >
-                {b.val}
-              </span>
-              <div
-                className="w-full min-h-1 rounded transition-[height] duration-600 ease-out"
-                style={{
-                  height: `${((b.val ?? 0) / 20) * 48}px`,
-                  backgroundColor: `${b.color}30`,
-                }}
-              />
-              <span className="font-mono text-[8px] text-muted-foreground/60">
-                {b.label}
-              </span>
-            </div>
-          ))}
-        </div>
+        <PipelineDensity
+          phases={[
+            { label: "Ph1", value: ind.pipeline_phase1 ?? 0, color: "#56B4E9" },
+            { label: "Ph2", value: ind.pipeline_phase2 ?? 0, color: "#E69F00" },
+            { label: "Ph3", value: ind.pipeline_phase3 ?? 0, color: "#009E73" },
+            {
+              label: "Filed",
+              value: ind.pipeline_filed ?? 0,
+              color: "#CC79A7",
+            },
+            {
+              label: "Mktd",
+              value: ind.pipeline_marketed ?? 0,
+              color: "#0072B2",
+            },
+          ]}
+        />
       </div>
 
       {/* AI Assessment */}

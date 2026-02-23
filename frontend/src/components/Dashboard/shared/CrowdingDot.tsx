@@ -6,9 +6,9 @@ interface CrowdingDotProps {
 }
 
 const levelColors: Record<string, string> = {
-  high: "bg-red-500",
-  medium: "bg-yellow-500",
-  low: "bg-green-500",
+  high: "#D55E00",
+  medium: "#56B4E9",
+  low: "#009E73",
 }
 
 export function CrowdingDot({ level, className }: CrowdingDotProps) {
@@ -16,9 +16,9 @@ export function CrowdingDot({ level, className }: CrowdingDotProps) {
     <span
       className={cn(
         "inline-block h-[7px] w-[7px] shrink-0 rounded-full",
-        levelColors[level] ?? "bg-gray-400",
         className,
       )}
+      style={{ backgroundColor: levelColors[level] ?? "#9ca3af" }}
     />
   )
 }

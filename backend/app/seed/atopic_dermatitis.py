@@ -113,16 +113,16 @@ def seed_atopic_dermatitis(session: Session) -> None:
 
     # ── Targets (Layer 2) ────────────────────────────────────────────────
     targets_data = [
-        ("IL-4/IL-13", "Cytokine", "Marketed", True, "high", 5),
-        ("JAK1", "Kinase", "Marketed", True, "high", 4),
-        ("JAK1/JAK2", "Kinase", "Marketed", True, "medium", 2),
-        ("OX40 / OX40L", "Co-stimulatory", "Phase 3", False, "medium", 3),
-        ("IL-13", "Cytokine", "Marketed", True, "medium", 2),
-        ("IL-31", "Cytokine", "Phase 3", False, "low", 2),
-        ("TSLP", "Cytokine", "Phase 2", False, "low", 1),
-        ("IL-22", "Cytokine", "Phase 2", False, "low", 1),
-        ("PDE4", "Enzyme", "Marketed", True, "medium", 2),
-        ("IL-33 / ST2", "Alarmin", "Phase 2", False, "low", 2),
+        ("IL-4/IL-13", "Cytokine", "Marketed", True),
+        ("JAK1", "Kinase", "Marketed", True),
+        ("JAK1/JAK2", "Kinase", "Marketed", True),
+        ("OX40 / OX40L", "Co-stimulatory", "Phase 3", False),
+        ("IL-13", "Cytokine", "Marketed", True),
+        ("IL-31", "Cytokine", "Phase 3", False),
+        ("TSLP", "Cytokine", "Phase 2", False),
+        ("IL-22", "Cytokine", "Phase 2", False),
+        ("PDE4", "Enzyme", "Marketed", True),
+        ("IL-33 / ST2", "Alarmin", "Phase 2", False),
     ]
     targets = {}
     for td in targets_data:
@@ -131,8 +131,6 @@ def seed_atopic_dermatitis(session: Session) -> None:
             target_class=td[1],
             most_advanced_phase=td[2],
             has_marketed_drug=td[3],
-            crowding=td[4],
-            compound_count=td[5],
             indication_id=indication.id,
         )
         session.add(t)

@@ -1233,16 +1233,6 @@ export const TargetWithCompoundsSchema = {
             title: 'Has Marketed Drug',
             default: false
         },
-        crowding: {
-            type: 'string',
-            maxLength: 10,
-            title: 'Crowding'
-        },
-        compound_count: {
-            type: 'integer',
-            title: 'Compound Count',
-            default: 0
-        },
         indication_id: {
             type: 'string',
             format: 'uuid',
@@ -1260,12 +1250,22 @@ export const TargetWithCompoundsSchema = {
             type: 'array',
             title: 'Compounds',
             default: []
+        },
+        compound_count: {
+            type: 'integer',
+            title: 'Compound Count',
+            default: 0
+        },
+        crowding: {
+            type: 'string',
+            title: 'Crowding',
+            default: 'low'
         }
     },
     type: 'object',
-    required: ['name', 'target_class', 'most_advanced_phase', 'crowding', 'indication_id', 'id'],
+    required: ['name', 'target_class', 'most_advanced_phase', 'indication_id', 'id'],
     title: 'TargetWithCompounds',
-    description: 'Target with full compound data for each drug pursuing it.'
+    description: 'Target with full compound data and computed competitive metrics.'
 } as const;
 
 export const TextInputContentSchema = {
