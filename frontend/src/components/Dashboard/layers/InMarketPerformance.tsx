@@ -1,13 +1,13 @@
 import type { DashboardPublic } from "@/client"
 
-import { Sparkline } from "../charts/Sparkline"
+import { RevenueChart } from "../charts/RevenueChart"
 import { AiAssessmentBox } from "../shared/AiAssessmentBox"
 
 interface InMarketPerformanceProps {
   data: DashboardPublic
 }
 
-const chartColors = ["#2563eb", "#6366f1", "#7c3aed", "#db2777", "#ca8a04"]
+const chartColors = ["#56B4E9", "#E69F00", "#009E73", "#CC79A7", "#0072B2"]
 
 export function InMarketPerformance({ data }: InMarketPerformanceProps) {
   const aiAssessment = data.ai_assessments.find((a) => a.layer === 4)
@@ -63,38 +63,46 @@ export function InMarketPerformance({ data }: InMarketPerformanceProps) {
       {/* Drug Performance Cards */}
       {drugs.map((d, i) => {
         const revenueData = d.revenue_history_m ?? []
+        const allYears = d.revenue_years ?? []
         const latestRevenue = revenueData[revenueData.length - 1] ?? 0
+
+        // Trim leading zeros so chart starts at market entry
+        const startIdx = revenueData.findIndex((v) => v > 0)
+        const trimmedRevenue =
+          startIdx >= 0 ? revenueData.slice(startIdx) : revenueData
+        const trimmedYears =
+          startIdx >= 0 ? allYears.slice(startIdx) : allYears
 
         return (
           <div key={d.id} className="rounded-xl border bg-card p-4 shadow-sm">
-            <div className="mb-2.5 flex items-start justify-between">
-              <div>
-                <div className="text-[15px] font-semibold">
-                  {d.compound_brand_name}
-                </div>
-                <div className="mt-1 flex items-center gap-1.5">
-                  <span className="font-mono text-[22px] font-bold">
-                    ${(latestRevenue / 1000).toFixed(1)}B
-                  </span>
-                  <span
-                    className={`text-[11px] font-medium ${
-                      (d.share_change_pct ?? 0) > 0
-                        ? "text-green-600"
-                        : "text-red-600"
-                    }`}
-                  >
-                    {(d.share_change_pct ?? 0) > 0 ? "\u2191" : "\u2193"}{" "}
-                    {Math.abs(d.share_change_pct ?? 0)}% share
-                  </span>
-                </div>
+            <div className="mb-3">
+              <div className="text-[15px] font-semibold">
+                {d.compound_brand_name}
               </div>
-              <div className="w-20 shrink-0">
-                <Sparkline
-                  data={revenueData}
-                  color={chartColors[i % chartColors.length]}
-                  height={36}
-                />
+              <div className="mt-1 flex items-center gap-1.5">
+                <span className="font-mono text-[22px] font-bold">
+                  ${(latestRevenue / 1000).toFixed(1)}B
+                </span>
+                <span
+                  className={`text-[11px] font-medium ${
+                    (d.share_change_pct ?? 0) > 0
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }`}
+                >
+                  {(d.share_change_pct ?? 0) > 0 ? "\u2191" : "\u2193"}{" "}
+                  {Math.abs(d.share_change_pct ?? 0)}% share
+                </span>
               </div>
+            </div>
+
+            {/* Revenue trend chart — full width */}
+            <div className="mb-3">
+              <RevenueChart
+                revenue={trimmedRevenue}
+                years={trimmedYears}
+                color={chartColors[i % chartColors.length]}
+              />
             </div>
 
             <div className="mb-2 grid grid-cols-3 gap-2 text-[10px]">
