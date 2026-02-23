@@ -109,7 +109,7 @@ export class IndicationsService {
      * Get Dashboard
      * Get the full competitive intelligence dashboard for an indication.
      *
-     * Loads all data across all 7 layers in a single request to avoid
+     * Loads all data across all 6 layers in a single request to avoid
      * waterfall requests from the frontend.
      *
      * Args:

@@ -9,7 +9,7 @@ interface ExpansionOpportunityProps {
 }
 
 export function ExpansionOpportunity({ data }: ExpansionOpportunityProps) {
-  const aiAssessment = data.ai_assessments.find((a) => a.layer === 6)
+  const aiAssessment = data.ai_assessments.find((a) => a.layer === 5)
   const expansions = data.expansion_indications
 
   // Calculate total platform value

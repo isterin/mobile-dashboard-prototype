@@ -656,28 +656,23 @@ def seed_atopic_dermatitis(session: Session) -> None:
         ),
         (
             2,
-            "Target Landscape",
+            "Competitive Pipeline",
             "White space exists in alarmins and neuro-immune axes. "
             "IL-4/IL-13 and JAK targets are saturated with 9+ programs "
             "each. The OX40/OX40L axis is the most active novel mechanism. "
             "The clearest differentiation opportunities lie in "
             "underexplored targets like TSLP, IL-22, and IL-33/ST2 — "
             "each has only 1–2 programs and no marketed drugs, though "
-            "clinical validation remains early-stage.",
-        ),
-        (
-            3,
-            "Compound Analysis",
+            "clinical validation remains early-stage. "
             "The compound landscape splits into two tiers: Dupixent as "
             "the dominant biologic with moderate efficacy but clean safety, "
             "and oral JAK inhibitors with superior efficacy but boxed "
             "warnings. Amlitelimab's Phase 2 data (~61% EASI-75 with "
             "clean safety) represents the most promising profile among "
-            "pipeline candidates. The differentiation gap is narrowest "
-            "for new injectable biologics targeting IL-13.",
+            "pipeline candidates.",
         ),
         (
-            4,
+            3,
             "Trial Tracker",
             "Data inflection point in H1 2027. Five Phase 3 trials are "
             "expected to report primary results between Q1–Q3 2027. "
@@ -687,8 +682,8 @@ def seed_atopic_dermatitis(session: Session) -> None:
             "create differentiation opportunities or eliminate them.",
         ),
         (
-            5,
-            "Commercial Landscape",
+            4,
+            "In-Market Performance",
             "Dupixent dominates but shows share erosion. Oral JAK "
             "inhibitors are gaining share despite black box warnings, "
             "signaling strong physician/patient demand for oral options. "
@@ -699,7 +694,7 @@ def seed_atopic_dermatitis(session: Session) -> None:
             "or subcutaneous entrant.",
         ),
         (
-            6,
+            5,
             "Expansion Potential",
             "Strong platform value across Type 2 inflammation. The "
             "IL-4/IL-13 axis has proven expansion into asthma ($8B), "
@@ -710,7 +705,7 @@ def seed_atopic_dermatitis(session: Session) -> None:
             "substantial platform optionality.",
         ),
         (
-            7,
+            6,
             "Investment Thesis: Conditional Positive",
             "Atopic Dermatitis remains an attractive market — large, "
             "growing, with persistent unmet need despite multiple "

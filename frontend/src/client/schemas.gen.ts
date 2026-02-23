@@ -488,17 +488,10 @@ export const DashboardPublicSchema = {
         },
         targets: {
             items: {
-                '$ref': '#/components/schemas/TargetWithDrugs'
+                '$ref': '#/components/schemas/TargetWithCompounds'
             },
             type: 'array',
             title: 'Targets'
-        },
-        compounds: {
-            items: {
-                '$ref': '#/components/schemas/CompoundPublic'
-            },
-            type: 'array',
-            title: 'Compounds'
         },
         trials: {
             items: {
@@ -551,7 +544,7 @@ export const DashboardPublicSchema = {
         }
     },
     type: 'object',
-    required: ['indication', 'patient_populations', 'standards_of_care', 'unmet_needs', 'targets', 'compounds', 'trials', 'marketed_drugs', 'expansion_indications', 'comparable_transactions', 'thesis_risks', 'go_nogo_criteria', 'ai_assessments'],
+    required: ['indication', 'patient_populations', 'standards_of_care', 'unmet_needs', 'targets', 'trials', 'marketed_drugs', 'expansion_indications', 'comparable_transactions', 'thesis_risks', 'go_nogo_criteria', 'ai_assessments'],
     title: 'DashboardPublic',
     description: 'Composite response containing all dashboard data for a single indication.'
 } as const;
@@ -1221,7 +1214,7 @@ export const SystemMessageSchema = {
     description: 'A system message.'
 } as const;
 
-export const TargetWithDrugsSchema = {
+export const TargetWithCompoundsSchema = {
     properties: {
         name: {
             type: 'string',
@@ -1260,19 +1253,19 @@ export const TargetWithDrugsSchema = {
             format: 'uuid',
             title: 'Id'
         },
-        drug_names: {
+        compounds: {
             items: {
-                type: 'string'
+                '$ref': '#/components/schemas/CompoundPublic'
             },
             type: 'array',
-            title: 'Drug Names',
+            title: 'Compounds',
             default: []
         }
     },
     type: 'object',
     required: ['name', 'target_class', 'most_advanced_phase', 'crowding', 'indication_id', 'id'],
-    title: 'TargetWithDrugs',
-    description: 'Target with the brand names of compounds pursuing it.'
+    title: 'TargetWithCompounds',
+    description: 'Target with full compound data for each drug pursuing it.'
 } as const;
 
 export const TextInputContentSchema = {

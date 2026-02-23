@@ -3,20 +3,18 @@ import { useEffect, useRef } from "react"
 import type { DashboardPublic, IndicationPublic } from "@/client"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-import { CompoundGrid } from "./layers/CompoundGrid"
+import { CompetitivePipeline } from "./layers/CompetitivePipeline"
 import { ExpansionOpportunity } from "./layers/ExpansionOpportunity"
+import { InMarketPerformance } from "./layers/InMarketPerformance"
 import { InvestmentThesis } from "./layers/InvestmentThesis"
 import { MarketOverview } from "./layers/MarketOverview"
-import { OnMarketPerformance } from "./layers/OnMarketPerformance"
-import { TargetLandscape } from "./layers/TargetLandscape"
 import { TrialTracker } from "./layers/TrialTracker"
 
 const TABS = [
   { id: "market", label: "Market", icon: "\u25C9" },
-  { id: "targets", label: "Targets", icon: "\u25CE" },
-  { id: "compounds", label: "Compounds", icon: "\u25C8" },
+  { id: "pipeline", label: "Pipeline", icon: "\u25CE" },
   { id: "trials", label: "Trials", icon: "\u25C7" },
-  { id: "on-market", label: "On Market", icon: "\u25C6" },
+  { id: "in-market", label: "In Market", icon: "\u25C6" },
   { id: "expansion", label: "Expansion", icon: "\u25CB" },
   { id: "thesis", label: "Thesis", icon: "\u2726" },
 ] as const
@@ -26,20 +24,16 @@ const TAB_TITLES: Record<string, { title: string; subtitle: string }> = {
     title: "Indication Market Overview",
     subtitle: "Is this indication worth entering?",
   },
-  targets: {
-    title: "Target & Mechanism Landscape",
-    subtitle: "Where are the scientific openings?",
-  },
-  compounds: {
-    title: "Competitive Compound Grid",
-    subtitle: "What exactly am I up against?",
+  pipeline: {
+    title: "Competitive Pipeline",
+    subtitle: "What mechanisms & compounds are in play?",
   },
   trials: {
     title: "Competitor Trial Tracker",
     subtitle: "What's coming and when?",
   },
-  "on-market": {
-    title: "On-Market Performance",
+  "in-market": {
+    title: "In-Market Performance",
     subtitle: "How entrenched are the incumbents?",
   },
   expansion: {
@@ -159,17 +153,14 @@ export function IndicationDashboard({
             <TabsContent value="market" className="mt-0">
               <MarketOverview data={dashboardData} />
             </TabsContent>
-            <TabsContent value="targets" className="mt-0">
-              <TargetLandscape data={dashboardData} />
-            </TabsContent>
-            <TabsContent value="compounds" className="mt-0">
-              <CompoundGrid data={dashboardData} />
+            <TabsContent value="pipeline" className="mt-0">
+              <CompetitivePipeline data={dashboardData} />
             </TabsContent>
             <TabsContent value="trials" className="mt-0">
               <TrialTracker data={dashboardData} />
             </TabsContent>
-            <TabsContent value="on-market" className="mt-0">
-              <OnMarketPerformance data={dashboardData} />
+            <TabsContent value="in-market" className="mt-0">
+              <InMarketPerformance data={dashboardData} />
             </TabsContent>
             <TabsContent value="expansion" className="mt-0">
               <ExpansionOpportunity data={dashboardData} />

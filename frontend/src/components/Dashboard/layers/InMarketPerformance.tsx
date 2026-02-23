@@ -3,14 +3,14 @@ import type { DashboardPublic } from "@/client"
 import { Sparkline } from "../charts/Sparkline"
 import { AiAssessmentBox } from "../shared/AiAssessmentBox"
 
-interface OnMarketPerformanceProps {
+interface InMarketPerformanceProps {
   data: DashboardPublic
 }
 
 const chartColors = ["#2563eb", "#6366f1", "#7c3aed", "#db2777", "#ca8a04"]
 
-export function OnMarketPerformance({ data }: OnMarketPerformanceProps) {
-  const aiAssessment = data.ai_assessments.find((a) => a.layer === 5)
+export function InMarketPerformance({ data }: InMarketPerformanceProps) {
+  const aiAssessment = data.ai_assessments.find((a) => a.layer === 4)
   const drugs = data.marketed_drugs
 
   return (
@@ -88,12 +88,13 @@ export function OnMarketPerformance({ data }: OnMarketPerformanceProps) {
                   </span>
                 </div>
               </div>
-              <Sparkline
-                data={revenueData}
-                color={chartColors[i % chartColors.length]}
-                width={80}
-                height={36}
-              />
+              <div className="w-20 shrink-0">
+                <Sparkline
+                  data={revenueData}
+                  color={chartColors[i % chartColors.length]}
+                  height={36}
+                />
+              </div>
             </div>
 
             <div className="mb-2 grid grid-cols-3 gap-2 text-[10px]">

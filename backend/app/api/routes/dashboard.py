@@ -1,6 +1,6 @@
 """API route for the composite dashboard endpoint.
 
-Returns all data for a single indication across all 7 layers in one call.
+Returns all data for a single indication across all 6 layers in one call.
 """
 
 import uuid
@@ -26,7 +26,7 @@ from app.models import (
     StandardOfCarePublic,
     Target,
     TargetPublic,
-    TargetWithDrugs,
+    TargetWithCompounds,
     ThesisRiskPublic,
     Trial,
     TrialPublic,
@@ -41,7 +41,7 @@ router = APIRouter(prefix="/indications", tags=["indications"])
 def get_dashboard(session: SessionDep, indication_id: uuid.UUID) -> DashboardPublic:
     """Get the full competitive intelligence dashboard for an indication.
 
-    Loads all data across all 7 layers in a single request to avoid
+    Loads all data across all 6 layers in a single request to avoid
     waterfall requests from the frontend.
 
     Args:
@@ -75,25 +75,19 @@ def get_dashboard(session: SessionDep, indication_id: uuid.UUID) -> DashboardPub
         key=lambda u: u.sort_order,
     )
 
-    # Layer 2 — Targets with compound names
+    # Layer 2 — Competitive Pipeline (targets with nested compounds)
     targets_raw = session.exec(
         select(Target).where(Target.indication_id == indication_id)
     ).all()
     targets_raw = sorted(targets_raw, key=lambda t: t.compound_count, reverse=True)
 
-    targets: list[TargetWithDrugs] = []
+    targets: list[TargetWithCompounds] = []
     for t in targets_raw:
-        drug_names = [c.brand_name for c in t.compounds]
+        compounds = [CompoundPublic.model_validate(c) for c in t.compounds]
         base = TargetPublic.model_validate(t).model_dump()
-        targets.append(TargetWithDrugs(**base, drug_names=drug_names))
+        targets.append(TargetWithCompounds(**base, compounds=compounds))
 
-    # Layer 3 — Compounds
-    compounds_raw = session.exec(
-        select(Compound).where(Compound.indication_id == indication_id)
-    ).all()
-    compounds = [CompoundPublic.model_validate(c) for c in compounds_raw]
-
-    # Layer 4 — Trials (flattened with compound info)
+    # Layer 3 — Trials (flattened with compound info)
     trials_raw = session.exec(
         select(Trial).join(Compound).where(Compound.indication_id == indication_id)
     ).all()
@@ -109,7 +103,7 @@ def get_dashboard(session: SessionDep, indication_id: uuid.UUID) -> DashboardPub
             )
         )
 
-    # Layer 5 — Marketed drug data (joined with compound info)
+    # Layer 4 — In-market drug data (joined with compound info)
     marketed_raw = session.exec(
         select(MarketedDrugData)
         .join(Compound)
@@ -129,13 +123,13 @@ def get_dashboard(session: SessionDep, indication_id: uuid.UUID) -> DashboardPub
             )
         )
 
-    # Layer 6 — Expansion indications
+    # Layer 5 — Expansion indications
     expansion_indications = [
         ExpansionIndicationPublic.model_validate(ei)
         for ei in indication.expansion_indications
     ]
 
-    # Layer 7 — Thesis data
+    # Layer 6 — Thesis data
     comparable_transactions = [
         ComparableTransactionPublic.model_validate(ct)
         for ct in indication.comparable_transactions
@@ -160,7 +154,6 @@ def get_dashboard(session: SessionDep, indication_id: uuid.UUID) -> DashboardPub
         standards_of_care=standards_of_care,
         unmet_needs=unmet_needs,
         targets=targets,
-        compounds=compounds,
         trials=trials,
         marketed_drugs=marketed_drugs,
         expansion_indications=expansion_indications,

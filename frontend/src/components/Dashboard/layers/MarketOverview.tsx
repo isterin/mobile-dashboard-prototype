@@ -41,7 +41,6 @@ export function MarketOverview({ data }: MarketOverviewProps) {
         <Sparkline
           data={ind.market_history ?? []}
           color="#2563eb"
-          width={340}
           height={48}
         />
         <div className="mt-1.5 flex justify-between px-0.5">

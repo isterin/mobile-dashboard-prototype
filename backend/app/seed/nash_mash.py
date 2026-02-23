@@ -590,7 +590,7 @@ def seed_nash_mash(session: Session) -> None:
         ),
         (
             2,
-            "Target Landscape",
+            "Competitive Pipeline",
             "Multi-mechanism opportunity with no clear winner. GLP-1 "
             "agonists show the strongest efficacy signals but require "
             "injection. THR-β (Rezdiffra) has first-mover advantage but "
@@ -598,21 +598,16 @@ def seed_nash_mash(session: Session) -> None:
             "interesting emerging class with dual resolution + fibrosis "
             "data. The field is wide open — combination strategies "
             "targeting multiple pathways will likely define the ultimate "
-            "standard of care.",
-        ),
-        (
-            3,
-            "Compound Analysis",
+            "standard of care. "
             "Semaglutide leads on efficacy (~59% NASH resolution) but "
             "is injectable and faces GLP-1 supply constraints. Rezdiffra "
             "has oral convenience but modest efficacy (~26%). The FGF21 "
             "analogs (pegozafermin, efruxifermin) occupy an attractive "
-            "middle ground. Tirzepatide's early Phase 2 data (~74% "
-            "resolution) is remarkable but very early. No compound has "
-            "yet demonstrated fibrosis reversal as a primary outcome.",
+            "middle ground. No compound has yet demonstrated fibrosis "
+            "reversal as a primary outcome.",
         ),
         (
-            4,
+            3,
             "Trial Tracker",
             "Critical data readouts in 2027. The ESSENCE trial "
             "(semaglutide) is the most pivotal — 88% enrolled, "
@@ -622,8 +617,8 @@ def seed_nash_mash(session: Session) -> None:
             "will look fundamentally different by end of 2027.",
         ),
         (
-            5,
-            "Commercial Landscape",
+            4,
+            "In-Market Performance",
             "First-mover is gaining traction but far from dominant. "
             "Rezdiffra's $580M first-year revenue is strong for a new "
             "category, but 42% formulary access shows payer resistance "
@@ -632,7 +627,7 @@ def seed_nash_mash(session: Session) -> None:
             "efficacy data and/or full approval.",
         ),
         (
-            6,
+            5,
             "Expansion Potential",
             "Massive platform value across metabolic disease. MASH "
             "mechanisms — particularly GLP-1 and FGF21 — have direct "
@@ -642,7 +637,7 @@ def seed_nash_mash(session: Session) -> None:
             "mechanism-level investments particularly attractive.",
         ),
         (
-            7,
+            6,
             "Investment Thesis: Positive",
             "MASH represents the strongest market opportunity in "
             "hepatology — perhaps in all of specialty pharma. The "

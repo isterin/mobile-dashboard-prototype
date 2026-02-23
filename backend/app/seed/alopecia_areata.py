@@ -537,18 +537,14 @@ def seed_alopecia_areata(session: Session) -> None:
         ),
         (
             2,
-            "Target Landscape",
+            "Competitive Pipeline",
             "JAK pathway dominates — the question is selectivity. JAK1/2 "
             "inhibitors have the strongest efficacy but carry BB warnings. "
             "JAK3/TEC inhibitors (ritlecitinib) avoid the BB warning but "
             "show more modest efficacy. TYK2/JAK1 selectivity represents "
             "an interesting middle ground with potentially better safety. "
             "IL-15 is the most intriguing non-JAK target but remains "
-            "early-stage.",
-        ),
-        (
-            3,
-            "Compound Analysis",
+            "early-stage. "
             "Two marketed drugs with complementary weaknesses define the "
             "opportunity. Olumiant has moderate efficacy (~35% SALT50) "
             "plus a BB warning. Litfulo avoids the BB warning but uses a "
@@ -557,7 +553,7 @@ def seed_alopecia_areata(session: Session) -> None:
             "TYK2/JAK1 axis seeking the efficacy-safety sweet spot.",
         ),
         (
-            4,
+            3,
             "Trial Tracker",
             "Key data windows in 2027. CTP-543 (RESTORE-1) is most "
             "advanced at 82% enrolled, reporting Q1 2027. Deuruxolitinib "
@@ -567,8 +563,8 @@ def seed_alopecia_areata(session: Session) -> None:
             "central question for the next wave of AA drugs.",
         ),
         (
-            5,
-            "Commercial Landscape",
+            4,
+            "In-Market Performance",
             "Market share is shifting toward the safer option. Litfulo "
             "is gaining share rapidly (+18.5% YoY) despite launching "
             "a year after Olumiant, driven by the absence of a BB "
@@ -578,7 +574,7 @@ def seed_alopecia_areata(session: Session) -> None:
             "signal for any new entrant's positioning strategy.",
         ),
         (
-            6,
+            5,
             "Expansion Potential",
             "Moderate platform value within autoimmune dermatology. "
             "JAK-based mechanisms have direct applicability to vitiligo "
@@ -589,7 +585,7 @@ def seed_alopecia_areata(session: Session) -> None:
             "AD limits incremental value.",
         ),
         (
-            7,
+            6,
             "Investment Thesis: Conditional Positive",
             "Alopecia Areata is an attractive niche with validated "
             "biology and clear commercial momentum. The market is growing "

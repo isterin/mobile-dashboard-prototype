@@ -107,8 +107,7 @@ export type DashboardPublic = {
     patient_populations: Array<PatientPopulationPublic>;
     standards_of_care: Array<StandardOfCarePublic>;
     unmet_needs: Array<UnmetNeedPublic>;
-    targets: Array<TargetWithDrugs>;
-    compounds: Array<CompoundPublic>;
+    targets: Array<TargetWithCompounds>;
     trials: Array<TrialWithCompound>;
     marketed_drugs: Array<MarketedDrugWithCompound>;
     expansion_indications: Array<ExpansionIndicationPublic>;
@@ -253,9 +252,9 @@ export type SystemMessage = {
 };
 
 /**
- * Target with the brand names of compounds pursuing it.
+ * Target with full compound data for each drug pursuing it.
  */
-export type TargetWithDrugs = {
+export type TargetWithCompounds = {
     name: string;
     target_class: string;
     most_advanced_phase: string;
@@ -264,7 +263,7 @@ export type TargetWithDrugs = {
     compound_count?: number;
     indication_id: string;
     id: string;
-    drug_names?: Array<(string)>;
+    compounds?: Array<CompoundPublic>;
 };
 
 /**

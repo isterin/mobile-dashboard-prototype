@@ -8,7 +8,7 @@ interface InvestmentThesisProps {
 }
 
 export function InvestmentThesis({ data }: InvestmentThesisProps) {
-  const aiAssessment = data.ai_assessments.find((a) => a.layer === 7)
+  const aiAssessment = data.ai_assessments.find((a) => a.layer === 6)
   const ind = data.indication
   const pop = data.patient_populations[0]
 

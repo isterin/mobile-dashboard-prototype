@@ -9,7 +9,7 @@ interface TrialTrackerProps {
 }
 
 export function TrialTracker({ data }: TrialTrackerProps) {
-  const aiAssessment = data.ai_assessments.find((a) => a.layer === 4)
+  const aiAssessment = data.ai_assessments.find((a) => a.layer === 3)
   const enrolling = data.trials.filter((t) => t.status === "Enrolling")
   const fastCount = data.trials.filter(
     (t) => t.enrollment_velocity === "fast",

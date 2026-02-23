@@ -60,7 +60,7 @@ export function CopilotChatSidebar({
 
   useCopilotReadable({
     description:
-      "Layer 2 — Target & Mechanism Landscape: biological targets being pursued, their classes, crowding levels, most advanced development phases, and associated drugs",
+      "Layer 2 — Competitive Pipeline: biological targets being pursued with their classes, crowding levels, most advanced phases, and nested compound details (sponsor, phase, efficacy, safety, designations) for each target",
     value: JSON.stringify({
       targets: dashboard?.targets ?? [],
     }),
@@ -68,15 +68,7 @@ export function CopilotChatSidebar({
 
   useCopilotReadable({
     description:
-      "Layer 3 — Competitive Compound Grid: compounds in development or on market with sponsor, mechanism of action, phase, efficacy data, and safety profiles",
-    value: JSON.stringify({
-      compounds: dashboard?.compounds ?? [],
-    }),
-  })
-
-  useCopilotReadable({
-    description:
-      "Layer 4 — Competitor Trial Tracker: clinical trials with phase, status, enrollment numbers, start/end dates, and associated compounds",
+      "Layer 3 — Competitor Trial Tracker: clinical trials with phase, status, enrollment numbers, start/end dates, and associated compounds",
     value: JSON.stringify({
       trials: dashboard?.trials ?? [],
     }),
@@ -84,7 +76,7 @@ export function CopilotChatSidebar({
 
   useCopilotReadable({
     description:
-      "Layer 5 — On-Market Performance: marketed drugs with revenue history, market share, WAC price, and prescription volume",
+      "Layer 4 — In-Market Performance: marketed drugs with revenue history, market share, WAC price, and prescription volume",
     value: JSON.stringify({
       marketed_drugs: dashboard?.marketed_drugs ?? [],
     }),
@@ -92,7 +84,7 @@ export function CopilotChatSidebar({
 
   useCopilotReadable({
     description:
-      "Layer 6 — Expansion Opportunity: potential expansion indications with market size, competitive density, and validation status",
+      "Layer 5 — Expansion Opportunity: potential expansion indications with market size, competitive density, and validation status",
     value: JSON.stringify({
       expansion_indications: dashboard?.expansion_indications ?? [],
     }),
@@ -100,7 +92,7 @@ export function CopilotChatSidebar({
 
   useCopilotReadable({
     description:
-      "Layer 7 — Investment Thesis: comparable transactions, thesis risks with severity, and go/no-go criteria with met/unmet status",
+      "Layer 6 — Investment Thesis: comparable transactions, thesis risks with severity, and go/no-go criteria with met/unmet status",
     value: JSON.stringify({
       comparable_transactions: dashboard?.comparable_transactions ?? [],
       thesis_risks: dashboard?.thesis_risks ?? [],

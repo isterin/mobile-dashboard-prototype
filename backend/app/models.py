@@ -12,7 +12,7 @@ Entity hierarchy:
     │
     ├── Compound                    Layer 3: drugs (pipeline + marketed)
     │   ├── Trial                   Layer 4: competitor clinical trials
-    │   └── MarketedDrugData        Layer 5: on-market commercial data
+    │   └── MarketedDrugData        Layer 5: in-market commercial data
     │
     ├── ComparableTransaction       Layer 7: recent licensing deals / acquisitions
     ├── ThesisRisk                  Layer 7: key investment risks
@@ -565,10 +565,10 @@ class AiAssessment(AiAssessmentBase, table=True):
 # =============================================================================
 
 
-class TargetWithDrugs(TargetPublic):
-    """Target with the brand names of compounds pursuing it."""
+class TargetWithCompounds(TargetPublic):
+    """Target with full compound data for each drug pursuing it."""
 
-    drug_names: list[str] = []
+    compounds: list[CompoundPublic] = []
 
 
 class TrialWithCompound(TrialPublic):
@@ -594,22 +594,19 @@ class DashboardPublic(SQLModel):
     standards_of_care: list[StandardOfCarePublic]
     unmet_needs: list[UnmetNeedPublic]
 
-    # Layer 2 — Target & Mechanism Landscape
-    targets: list[TargetWithDrugs]
+    # Layer 2 — Competitive Pipeline (targets with nested compounds)
+    targets: list[TargetWithCompounds]
 
-    # Layer 3 — Competitive Compound Grid
-    compounds: list[CompoundPublic]
-
-    # Layer 4 — Competitor Trial Tracker
+    # Layer 3 — Competitor Trial Tracker
     trials: list[TrialWithCompound]
 
-    # Layer 5 — On-Market Performance
+    # Layer 4 — In-Market Performance
     marketed_drugs: list[MarketedDrugWithCompound]
 
-    # Layer 6 — Expansion Opportunity
+    # Layer 5 — Expansion Opportunity
     expansion_indications: list[ExpansionIndicationPublic]
 
-    # Layer 7 — Investment Thesis
+    # Layer 6 — Investment Thesis
     comparable_transactions: list[ComparableTransactionPublic]
     thesis_risks: list[ThesisRiskPublic]
     go_nogo_criteria: list[GoNoGoCriterionPublic]
