@@ -31,7 +31,7 @@ export function BarHorizontal({
             dataKey="value"
             radius={[3, 3, 3, 3]}
             isAnimationActive={false}
-            background={{ fill: "hsl(var(--muted) / 0.5)", radius: 3 }}
+            background={{ fill: "#e2e8f0", radius: 3 }}
           >
             <Cell fill={fillColor} />
           </Bar>
