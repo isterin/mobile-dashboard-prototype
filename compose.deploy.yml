@@ -1,0 +1,195 @@
+# =============================================================================
+# Deploy Docker Compose for Mobile Market Analysis Dashboard
+# =============================================================================
+#
+# Pulls pre-built images from DigitalOcean container registry.
+# Use this on machines that don't have the source code / build toolchain.
+#
+# Prerequisites:
+#   1. Docker running (OrbStack or Docker Desktop)
+#   2. Authenticated to DO registry: doctl registry login
+#   3. AWS SSO login for AI chat: aws sso login --profile datafabric
+#
+# Usage:
+#   docker compose -f compose.deploy.yml up -d
+#   Or: task deploy:up:d
+#
+# Then open:
+#   http://localhost          -> Dashboard
+#   http://localhost:8090     -> Traefik dashboard
+#
+# =============================================================================
+
+x-backend-image: &backend-image
+  registry.digitalocean.com/ilyasterin/mobile-dashboard-prototype-backend:latest
+
+x-backend-env: &backend-env
+  DOMAIN: localhost
+  FRONTEND_HOST: http://localhost
+  ENVIRONMENT: local
+  PROJECT_NAME: "Mobile Market Analysis Dashboard"
+  BACKEND_CORS_ORIGINS: "http://localhost"
+  POSTGRES_SERVER: db
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: marketanalysis
+  POSTGRES_USER: marketanalysis
+  POSTGRES_PASSWORD: marketanalysis
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # Reverse Proxy - path-based routing on localhost:80
+  # ---------------------------------------------------------------------------
+  traefik:
+    image: traefik:3.6
+    restart: always
+    command:
+      - --providers.docker
+      - --providers.docker.constraints=Label(`traefik.constraint-label`, `standalone`)
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.http.address=:80
+      - --accesslog
+      - --log
+      - --log.level=INFO
+      - --api
+      - --api.insecure=true
+    ports:
+      - "80:80"
+      - "8090:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+      - traefik.enable=true
+      - traefik.constraint-label=standalone
+      - traefik.http.middlewares.https-redirect.contenttype.autodetect=false
+    networks:
+      - deploy
+
+  # ---------------------------------------------------------------------------
+  # Database
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:18
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U marketanalysis -d marketanalysis"]
+      interval: 5s
+      retries: 10
+      start_period: 10s
+      timeout: 5s
+    volumes:
+      - deploy-db-data:/var/lib/postgresql/data/pgdata
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_USER: marketanalysis
+      POSTGRES_PASSWORD: marketanalysis
+      POSTGRES_DB: marketanalysis
+    networks:
+      - deploy
+
+  # ---------------------------------------------------------------------------
+  # Prestart - runs migrations and creates initial data
+  # ---------------------------------------------------------------------------
+  prestart:
+    image: *backend-image
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+    command: bash scripts/prestart.sh
+    environment:
+      <<: *backend-env
+    networks:
+      - deploy
+
+  # ---------------------------------------------------------------------------
+  # Seed Data - populates the database with sample market analysis data
+  # Runs after prestart completes (non-blocking to backend)
+  # ---------------------------------------------------------------------------
+  seed-data:
+    image: *backend-image
+    depends_on:
+      prestart:
+        condition: service_completed_successfully
+    command: python -m app.seed_data
+    environment:
+      <<: *backend-env
+    networks:
+      - deploy
+
+  # ---------------------------------------------------------------------------
+  # Backend - FastAPI application
+  # ---------------------------------------------------------------------------
+  backend:
+    image: *backend-image
+    restart: always
+    depends_on:
+      prestart:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      <<: *backend-env
+      # AWS credentials for Bedrock LLM (AI chat)
+      AWS_PROFILE: ${AWS_PROFILE:-datafabric}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+    volumes:
+      - ${AWS_DIR:-~/.aws}:/root/.aws
+    labels:
+      - traefik.enable=true
+      - traefik.constraint-label=standalone
+      - traefik.http.services.backend.loadbalancer.server.port=8000
+      - traefik.http.routers.backend.rule=PathPrefix(`/api`) || PathPrefix(`/agent`)
+      - traefik.http.routers.backend.entrypoints=http
+      - traefik.http.routers.backend.priority=20
+    networks:
+      - deploy
+
+  # ---------------------------------------------------------------------------
+  # CopilotKit Runtime - Express bridge between frontend and AG-UI agent
+  # ---------------------------------------------------------------------------
+  copilot-runtime:
+    image: registry.digitalocean.com/ilyasterin/mobile-dashboard-prototype-copilot-runtime:latest
+    restart: always
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      AGENT_URL: http://backend:8000/agent
+      FRONTEND_URL: http://localhost
+      COPILOT_PORT: "4000"
+    labels:
+      - traefik.enable=true
+      - traefik.constraint-label=standalone
+      - traefik.http.services.copilot.loadbalancer.server.port=4000
+      - traefik.http.routers.copilot.rule=PathPrefix(`/copilotkit`)
+      - traefik.http.routers.copilot.entrypoints=http
+      - traefik.http.routers.copilot.priority=20
+    networks:
+      - deploy
+
+  # ---------------------------------------------------------------------------
+  # Frontend - React SPA served by Nginx
+  # ---------------------------------------------------------------------------
+  frontend:
+    image: registry.digitalocean.com/ilyasterin/mobile-dashboard-prototype-frontend:latest
+    restart: always
+    labels:
+      - traefik.enable=true
+      - traefik.constraint-label=standalone
+      - traefik.http.services.frontend.loadbalancer.server.port=80
+      - traefik.http.routers.frontend.rule=PathPrefix(`/`)
+      - traefik.http.routers.frontend.entrypoints=http
+      - traefik.http.routers.frontend.priority=1
+    networks:
+      - deploy
+
+volumes:
+  deploy-db-data:
+
+networks:
+  deploy:
+    driver: bridge

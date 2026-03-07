@@ -1,0 +1,22 @@
+# CopilotKit Runtime Server
+# Lightweight container that runs the Express/CopilotKit middleware bridge
+# between the frontend React app and the backend AG-UI agent.
+
+FROM oven/bun:1
+
+WORKDIR /app
+
+# Install dependencies (uses workspace root + frontend package.json)
+COPY package.json bun.lock /app/
+COPY frontend/package.json /app/frontend/
+
+WORKDIR /app/frontend
+
+RUN bun install
+
+# Copy only the runtime entrypoint (no need for full frontend source)
+COPY frontend/copilot-runtime.ts /app/frontend/
+
+EXPOSE 4000
+
+CMD ["bun", "run", "copilot-runtime.ts"]

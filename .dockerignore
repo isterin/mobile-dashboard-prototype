@@ -1,0 +1,28 @@
+# Dependencies (installed inside container by bun/uv)
+frontend/node_modules
+backend/.venv
+.venv
+
+# Build artifacts
+frontend/dist
+backend/htmlcov
+
+# Git
+.git
+
+# IDE / OS
+.idea
+.vscode
+*.swp
+.DS_Store
+
+# Test artifacts
+frontend/blob-report
+frontend/test-results
+frontend/playwright-report
+
+# Docker compose files (not needed inside images)
+compose*.yml
+
+# Root env file (config is passed via environment variables in compose)
+.env

@@ -1,0 +1,230 @@
+# =============================================================================
+# Standalone Docker Compose for Mobile Market Analysis Dashboard
+# =============================================================================
+#
+# Self-contained deployment that brings up the entire application stack:
+#   - PostgreSQL database
+#   - Backend (FastAPI) with migrations and seed data
+#   - Frontend (React/Nginx)
+#   - CopilotKit Runtime (Express bridge for AI chat)
+#   - Traefik reverse proxy (path-based routing on port 80)
+#
+# Usage:
+#   docker compose -f compose.standalone.yml up --build
+#
+# Then open:
+#   http://localhost          -> Dashboard
+#   http://localhost:8090     -> Traefik dashboard
+#
+# AI Chat (optional):
+#   Requires AWS credentials for Bedrock LLM access.
+#   By default, mounts ~/.aws and uses the "datafabric" AWS profile.
+#   Override with environment variables:
+#     AWS_PROFILE=myprofile docker compose -f compose.standalone.yml up --build
+#     AWS_DIR=/path/to/.aws docker compose -f compose.standalone.yml up --build
+#
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # Reverse Proxy - path-based routing on localhost:80
+  # ---------------------------------------------------------------------------
+  traefik:
+    image: traefik:3.6
+    restart: always
+    command:
+      - --providers.docker
+      - --providers.docker.constraints=Label(`traefik.constraint-label`, `standalone`)
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.http.address=:80
+      - --accesslog
+      - --log
+      - --log.level=INFO
+      - --api
+      - --api.insecure=true
+    ports:
+      - "80:80"
+      - "8090:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+      - traefik.enable=true
+      - traefik.constraint-label=standalone
+      # Dummy https-redirect middleware (required by some labels, does nothing in HTTP-only mode)
+      - traefik.http.middlewares.https-redirect.contenttype.autodetect=false
+    networks:
+      - standalone
+
+  # ---------------------------------------------------------------------------
+  # Database
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:18
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U marketanalysis -d marketanalysis"]
+      interval: 5s
+      retries: 10
+      start_period: 10s
+      timeout: 5s
+    volumes:
+      - standalone-db-data:/var/lib/postgresql/data/pgdata
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_USER: marketanalysis
+      POSTGRES_PASSWORD: marketanalysis
+      POSTGRES_DB: marketanalysis
+    networks:
+      - standalone
+
+  # ---------------------------------------------------------------------------
+  # Prestart - runs migrations and creates initial data
+  # ---------------------------------------------------------------------------
+  prestart:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+    command: bash scripts/prestart.sh
+    environment:
+      DOMAIN: localhost
+      FRONTEND_HOST: http://localhost
+      ENVIRONMENT: local
+      PROJECT_NAME: "Mobile Market Analysis Dashboard"
+      BACKEND_CORS_ORIGINS: "http://localhost"
+      POSTGRES_SERVER: db
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: marketanalysis
+      POSTGRES_USER: marketanalysis
+      POSTGRES_PASSWORD: marketanalysis
+    networks:
+      - standalone
+
+  # ---------------------------------------------------------------------------
+  # Seed Data - populates the database with sample market analysis data
+  # Runs after prestart completes (non-blocking to backend)
+  # ---------------------------------------------------------------------------
+  seed-data:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    depends_on:
+      prestart:
+        condition: service_completed_successfully
+    command: python -m app.seed_data
+    environment:
+      DOMAIN: localhost
+      FRONTEND_HOST: http://localhost
+      ENVIRONMENT: local
+      PROJECT_NAME: "Mobile Market Analysis Dashboard"
+      BACKEND_CORS_ORIGINS: "http://localhost"
+      POSTGRES_SERVER: db
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: marketanalysis
+      POSTGRES_USER: marketanalysis
+      POSTGRES_PASSWORD: marketanalysis
+    networks:
+      - standalone
+
+  # ---------------------------------------------------------------------------
+  # Backend - FastAPI application
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: always
+    depends_on:
+      prestart:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      DOMAIN: localhost
+      FRONTEND_HOST: http://localhost
+      ENVIRONMENT: local
+      PROJECT_NAME: "Mobile Market Analysis Dashboard"
+      BACKEND_CORS_ORIGINS: "http://localhost"
+      POSTGRES_SERVER: db
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: marketanalysis
+      POSTGRES_USER: marketanalysis
+      POSTGRES_PASSWORD: marketanalysis
+      # AWS credentials for Bedrock LLM (AI chat)
+      AWS_PROFILE: ${AWS_PROFILE:-datafabric}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+    volumes:
+      - ${AWS_DIR:-~/.aws}:/root/.aws
+    labels:
+      - traefik.enable=true
+      - traefik.constraint-label=standalone
+      - traefik.http.services.backend.loadbalancer.server.port=8000
+      # Route /api/* and /agent/* to the backend
+      - traefik.http.routers.backend.rule=PathPrefix(`/api`) || PathPrefix(`/agent`)
+      - traefik.http.routers.backend.entrypoints=http
+      - traefik.http.routers.backend.priority=20
+    networks:
+      - standalone
+
+  # ---------------------------------------------------------------------------
+  # CopilotKit Runtime - Express bridge between frontend and AG-UI agent
+  # ---------------------------------------------------------------------------
+  copilot-runtime:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile.copilot
+    restart: always
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      AGENT_URL: http://backend:8000/agent
+      FRONTEND_URL: http://localhost
+      COPILOT_PORT: "4000"
+    labels:
+      - traefik.enable=true
+      - traefik.constraint-label=standalone
+      - traefik.http.services.copilot.loadbalancer.server.port=4000
+      # Route /copilotkit/* to the CopilotKit runtime
+      - traefik.http.routers.copilot.rule=PathPrefix(`/copilotkit`)
+      - traefik.http.routers.copilot.entrypoints=http
+      - traefik.http.routers.copilot.priority=20
+    networks:
+      - standalone
+
+  # ---------------------------------------------------------------------------
+  # Frontend - React SPA served by Nginx
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        # Empty string = same origin (requests go through Traefik on /)
+        VITE_API_URL: ""
+        VITE_COPILOT_RUNTIME_URL: /copilotkit
+    restart: always
+    labels:
+      - traefik.enable=true
+      - traefik.constraint-label=standalone
+      - traefik.http.services.frontend.loadbalancer.server.port=80
+      # Catch-all: everything not matched above goes to the frontend
+      - traefik.http.routers.frontend.rule=PathPrefix(`/`)
+      - traefik.http.routers.frontend.entrypoints=http
+      - traefik.http.routers.frontend.priority=1
+    networks:
+      - standalone
+
+volumes:
+  standalone-db-data:
+
+networks:
+  standalone:
+    driver: bridge

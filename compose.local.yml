@@ -1,6 +1,6 @@
 # Local development infrastructure
 # Usage: docker compose -f compose.local.yml up -d
-# Or use: task dev-infra
+# Or use: task dev:infra
 
 services:
   postgres:
@@ -21,16 +21,6 @@ services:
       timeout: 5s
       retries: 5
 
-  adminer:
-    image: adminer
-    container_name: market-analysis-adminer
-    environment:
-      ADMINER_DESIGN: pepa-linha-dark
-    ports:
-      - "8080:8080"
-    depends_on:
-      - postgres
-    restart: unless-stopped
 
 volumes:
   postgres_data:

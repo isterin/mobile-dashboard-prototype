@@ -3,6 +3,9 @@ version: "3"
 vars:
   BACKEND_DIR: ./backend
   FRONTEND_DIR: ./frontend
+  # Docker registry for image push (DigitalOcean)
+  REGISTRY: registry.digitalocean.com/ilyasterin
+  IMAGE_PREFIX: mobile-dashboard-prototype
 
 tasks:
   # =============================================================================
@@ -11,47 +14,47 @@ tasks:
   dev:
     desc: Start infrastructure and all dev servers (frontend, backend, copilot runtime)
     deps:
-      - dev-infra
+      - dev:infra
     cmds:
       - concurrently --kill-others-on-fail --names "fe,be,copilot" --prefix-colors "cyan,magenta,yellow" "cd {{.FRONTEND_DIR}} && bun run dev" "cd {{.BACKEND_DIR}} && uv run fastapi dev app/main.py" "cd {{.FRONTEND_DIR}} && bun run copilot"
 
-  dev-frontend:
+  dev:frontend:
     desc: Start frontend dev server (http://localhost:5173)
     dir: "{{.FRONTEND_DIR}}"
     cmds:
       - bun run dev
 
-  dev-backend:
+  dev:backend:
     desc: Start backend dev server (http://localhost:8000)
     dir: "{{.BACKEND_DIR}}"
     cmds:
       - uv run fastapi dev app/main.py
 
-  dev-copilot:
+  dev:copilot:
     desc: Start CopilotKit runtime server (http://localhost:4000)
     dir: "{{.FRONTEND_DIR}}"
     cmds:
       - bun run copilot
 
   # =============================================================================
-  # Infrastructure
+  # Infrastructure (local dev - postgres only)
   # =============================================================================
-  dev-infra:
-    desc: Start local infrastructure (postgres, adminer)
+  dev:infra:
+    desc: Start local infrastructure (postgres)
     cmds:
       - docker compose -f compose.local.yml up -d
 
-  dev-infra-stop:
+  dev:infra:stop:
     desc: Stop local infrastructure
     cmds:
       - docker compose -f compose.local.yml down
 
-  dev-infra-logs:
+  dev:infra:logs:
     desc: Tail logs from local infrastructure
     cmds:
       - docker compose -f compose.local.yml logs -f
 
-  dev-infra-clean:
+  dev:infra:clean:
     desc: Stop infrastructure and remove volumes (fresh database)
     cmds:
       - docker compose -f compose.local.yml down -v
@@ -64,13 +67,13 @@ tasks:
     cmds:
       - concurrently --kill-others-on-fail --names "fe,be" --prefix-colors "cyan,magenta" "cd {{.FRONTEND_DIR}} && bun install" "cd {{.BACKEND_DIR}} && uv sync"
 
-  install-frontend:
+  install:frontend:
     desc: Install frontend dependencies
     dir: "{{.FRONTEND_DIR}}"
     cmds:
       - bun install
 
-  install-backend:
+  install:backend:
     desc: Install backend dependencies
     dir: "{{.BACKEND_DIR}}"
     cmds:
@@ -79,24 +82,24 @@ tasks:
   # =============================================================================
   # Database
   # =============================================================================
-  db-migrate:
+  db:migrate:
     desc: Run all pending database migrations
     dir: "{{.BACKEND_DIR}}"
     cmds:
       - uv run alembic upgrade head
 
-  db-rollback:
+  db:rollback:
     desc: Rollback the last database migration
     dir: "{{.BACKEND_DIR}}"
     cmds:
       - uv run alembic downgrade -1
 
-  db-revision:
-    desc: 'Create a new database migration (usage: task db-revision NAME="description")'
+  db:revision:
+    desc: 'Create a new database migration (usage: task db:revision NAME="description")'
     dir: "{{.BACKEND_DIR}}"
     preconditions:
       - sh: 'test -n "{{.NAME}}"'
-        msg: 'NAME is required. Usage: task db-revision NAME="add users table"'
+        msg: 'NAME is required. Usage: task db:revision NAME="add users table"'
     cmds:
       - uv run alembic revision --autogenerate -m "{{.NAME}}"
 
@@ -112,16 +115,16 @@ tasks:
   lint:
     desc: Lint and format all code
     cmds:
-      - task: lint-frontend
-      - task: lint-backend
+      - task: lint:frontend
+      - task: lint:backend
 
-  lint-frontend:
+  lint:frontend:
     desc: Lint and format frontend code
     dir: "{{.FRONTEND_DIR}}"
     cmds:
       - bun run lint
 
-  lint-backend:
+  lint:backend:
     desc: Lint and format backend code
     dir: "{{.BACKEND_DIR}}"
     cmds:
@@ -131,7 +134,130 @@ tasks:
   # =============================================================================
   # Code Generation
   # =============================================================================
-  generate-client:
+  generate:client:
     desc: Regenerate frontend API client from OpenAPI spec
     cmds:
       - ./scripts/generate-client.sh
+
+  # =============================================================================
+  # Docker (Standalone - build from source)
+  # =============================================================================
+  docker:up:
+    desc: Start standalone deployment (build + run all services on http://localhost)
+    cmds:
+      - docker compose -f compose.standalone.yml up --build
+
+  docker:up:d:
+    desc: Start standalone deployment in background
+    cmds:
+      - docker compose -f compose.standalone.yml up --build -d
+
+  docker:down:
+    desc: Stop standalone deployment
+    cmds:
+      - docker compose -f compose.standalone.yml down
+
+  docker:down:v:
+    desc: Stop standalone deployment and delete all data
+    cmds:
+      - docker compose -f compose.standalone.yml down -v
+
+  docker:logs:
+    desc: Tail logs from standalone deployment
+    cmds:
+      - docker compose -f compose.standalone.yml logs -f
+
+  docker:build:
+    desc: Build all standalone Docker images
+    cmds:
+      - docker compose -f compose.standalone.yml build
+
+  docker:ps:
+    desc: Show status of standalone services
+    cmds:
+      - docker compose -f compose.standalone.yml ps -a
+
+  docker:login:
+    desc: Authenticate Docker to DigitalOcean container registry
+    cmds:
+      - doctl registry login
+
+  docker:push:
+    desc: Build, tag, and push all images to the registry
+    deps:
+      - docker:build
+    cmds:
+      - task: docker:push:backend
+      - task: docker:push:frontend
+      - task: docker:push:copilot
+
+  docker:push:backend:
+    desc: Tag and push backend image to the registry
+    vars:
+      SHA:
+        sh: git rev-parse --short HEAD
+    cmds:
+      - docker tag {{.IMAGE_PREFIX}}-backend {{.REGISTRY}}/{{.IMAGE_PREFIX}}-backend:latest
+      - docker tag {{.IMAGE_PREFIX}}-backend {{.REGISTRY}}/{{.IMAGE_PREFIX}}-backend:{{.SHA}}
+      - docker push {{.REGISTRY}}/{{.IMAGE_PREFIX}}-backend:latest
+      - docker push {{.REGISTRY}}/{{.IMAGE_PREFIX}}-backend:{{.SHA}}
+
+  docker:push:frontend:
+    desc: Tag and push frontend image to the registry
+    vars:
+      SHA:
+        sh: git rev-parse --short HEAD
+    cmds:
+      - docker tag {{.IMAGE_PREFIX}}-frontend {{.REGISTRY}}/{{.IMAGE_PREFIX}}-frontend:latest
+      - docker tag {{.IMAGE_PREFIX}}-frontend {{.REGISTRY}}/{{.IMAGE_PREFIX}}-frontend:{{.SHA}}
+      - docker push {{.REGISTRY}}/{{.IMAGE_PREFIX}}-frontend:latest
+      - docker push {{.REGISTRY}}/{{.IMAGE_PREFIX}}-frontend:{{.SHA}}
+
+  docker:push:copilot:
+    desc: Tag and push copilot-runtime image to the registry
+    vars:
+      SHA:
+        sh: git rev-parse --short HEAD
+    cmds:
+      - docker tag {{.IMAGE_PREFIX}}-copilot-runtime {{.REGISTRY}}/{{.IMAGE_PREFIX}}-copilot-runtime:latest
+      - docker tag {{.IMAGE_PREFIX}}-copilot-runtime {{.REGISTRY}}/{{.IMAGE_PREFIX}}-copilot-runtime:{{.SHA}}
+      - docker push {{.REGISTRY}}/{{.IMAGE_PREFIX}}-copilot-runtime:latest
+      - docker push {{.REGISTRY}}/{{.IMAGE_PREFIX}}-copilot-runtime:{{.SHA}}
+
+  # =============================================================================
+  # Deploy (pull pre-built images from registry)
+  # =============================================================================
+  deploy:up:
+    desc: Pull images from registry and start deployment
+    cmds:
+      - docker compose -f compose.deploy.yml up
+
+  deploy:up:d:
+    desc: Pull images from registry and start deployment in background
+    cmds:
+      - docker compose -f compose.deploy.yml up -d
+
+  deploy:down:
+    desc: Stop deployment
+    cmds:
+      - docker compose -f compose.deploy.yml down
+
+  deploy:down:v:
+    desc: Stop deployment and delete all data
+    cmds:
+      - docker compose -f compose.deploy.yml down -v
+
+  deploy:logs:
+    desc: Tail logs from deployment
+    cmds:
+      - docker compose -f compose.deploy.yml logs -f
+
+  deploy:ps:
+    desc: Show status of deployment services
+    cmds:
+      - docker compose -f compose.deploy.yml ps -a
+
+  deploy:pull:
+    desc: Pull latest images from registry
+    cmds:
+      - docker compose -f compose.deploy.yml pull

@@ -11,7 +11,7 @@ cd frontend && bun run dev                      # Frontend dev server (port 5173
 cd frontend && bun run copilot                  # CopilotKit runtime (port 4000)
 
 # Infrastructure
-docker compose -f compose.local.yml up -d       # Start postgres + adminer
+docker compose -f compose.local.yml up -d       # Start postgres
 docker compose -f compose.local.yml down         # Stop infra
 ```
 
