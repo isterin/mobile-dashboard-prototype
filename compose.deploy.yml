@@ -15,8 +15,8 @@
 #   Or: task deploy:up:d
 #
 # Then open:
-#   http://localhost          -> Dashboard
-#   http://localhost:8090     -> Traefik dashboard
+#   http://localhost:3081     -> Dashboard
+#   http://localhost:3091     -> Traefik dashboard
 #
 # =============================================================================
 
@@ -25,10 +25,10 @@ x-backend-image: &backend-image
 
 x-backend-env: &backend-env
   DOMAIN: localhost
-  FRONTEND_HOST: http://localhost
+  FRONTEND_HOST: http://localhost:3081
   ENVIRONMENT: local
   PROJECT_NAME: "Mobile Market Analysis Dashboard"
-  BACKEND_CORS_ORIGINS: "http://localhost"
+  BACKEND_CORS_ORIGINS: "http://localhost:3081"
   POSTGRES_SERVER: db
   POSTGRES_PORT: "5432"
   POSTGRES_DB: marketanalysis
@@ -38,14 +38,14 @@ x-backend-env: &backend-env
 services:
 
   # ---------------------------------------------------------------------------
-  # Reverse Proxy - path-based routing on localhost:80
+  # Reverse Proxy - path-based routing on localhost:3081
   # ---------------------------------------------------------------------------
   traefik:
     image: traefik:3.6
     restart: always
     command:
       - --providers.docker
-      - --providers.docker.constraints=Label(`traefik.constraint-label`, `standalone`)
+      - --providers.docker.constraints=Label(`traefik.constraint-label`, `mobile-dashboard`)
       - --providers.docker.exposedbydefault=false
       - --entrypoints.http.address=:80
       - --accesslog
@@ -54,13 +54,13 @@ services:
       - --api
       - --api.insecure=true
     ports:
-      - "80:80"
-      - "8090:8080"
+      - "3081:80"
+      - "3091:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     labels:
       - traefik.enable=true
-      - traefik.constraint-label=standalone
+      - traefik.constraint-label=mobile-dashboard
       - traefik.http.middlewares.https-redirect.contenttype.autodetect=false
     networks:
       - deploy
@@ -140,11 +140,11 @@ services:
       - ${AWS_DIR:-~/.aws}:/root/.aws
     labels:
       - traefik.enable=true
-      - traefik.constraint-label=standalone
-      - traefik.http.services.backend.loadbalancer.server.port=8000
-      - traefik.http.routers.backend.rule=PathPrefix(`/api`) || PathPrefix(`/agent`)
-      - traefik.http.routers.backend.entrypoints=http
-      - traefik.http.routers.backend.priority=20
+      - traefik.constraint-label=mobile-dashboard
+      - traefik.http.services.md-backend.loadbalancer.server.port=8000
+      - traefik.http.routers.md-backend.rule=PathPrefix(`/api`) || PathPrefix(`/agent`)
+      - traefik.http.routers.md-backend.entrypoints=http
+      - traefik.http.routers.md-backend.priority=20
     networks:
       - deploy
 
@@ -159,15 +159,15 @@ services:
         condition: service_healthy
     environment:
       AGENT_URL: http://backend:8000/agent
-      FRONTEND_URL: http://localhost
+      FRONTEND_URL: http://localhost:3081
       COPILOT_PORT: "4000"
     labels:
       - traefik.enable=true
-      - traefik.constraint-label=standalone
-      - traefik.http.services.copilot.loadbalancer.server.port=4000
-      - traefik.http.routers.copilot.rule=PathPrefix(`/copilotkit`)
-      - traefik.http.routers.copilot.entrypoints=http
-      - traefik.http.routers.copilot.priority=20
+      - traefik.constraint-label=mobile-dashboard
+      - traefik.http.services.md-copilot.loadbalancer.server.port=4000
+      - traefik.http.routers.md-copilot.rule=PathPrefix(`/copilotkit`)
+      - traefik.http.routers.md-copilot.entrypoints=http
+      - traefik.http.routers.md-copilot.priority=20
     networks:
       - deploy
 
@@ -179,11 +179,11 @@ services:
     restart: always
     labels:
       - traefik.enable=true
-      - traefik.constraint-label=standalone
-      - traefik.http.services.frontend.loadbalancer.server.port=80
-      - traefik.http.routers.frontend.rule=PathPrefix(`/`)
-      - traefik.http.routers.frontend.entrypoints=http
-      - traefik.http.routers.frontend.priority=1
+      - traefik.constraint-label=mobile-dashboard
+      - traefik.http.services.md-frontend.loadbalancer.server.port=80
+      - traefik.http.routers.md-frontend.rule=PathPrefix(`/`)
+      - traefik.http.routers.md-frontend.entrypoints=http
+      - traefik.http.routers.md-frontend.priority=1
     networks:
       - deploy
 
